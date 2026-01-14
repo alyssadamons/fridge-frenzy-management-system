@@ -5,24 +5,22 @@ My responsibility focused on the customer management dashboard which consisted o
 
 What I was responsible for:
 
-Customer management (add, edit, view, soft-delete, restore).
+1. Customer management (add, edit, view, soft-delete, restore).
 
-Order management (add, edit, view, soft-delete, restore).
+2. Order management (add, edit, view, soft-delete, restore).
 
-Fridge allocation to customers.
+3. Fridge allocation to customers.
 
-Employee dashboard navigation.
+4. Employee dashboard navigation.
 
-Role-based login redirection (customers vs employees).
-
-Admin and Customer Management dashboard UI and layout improvements.
+5. Admin and Customer Management dashboard UI and layout improvements.
 
 Project Overview:
 
 Fridge Frenzy is a web-based system that allows:
 
-Customers to register, log in, browse products, and manage their profiles
+1. Customers to register, log in, browse products, and manage their profiles.
 
-Employees to log in and manage customers, fridges, allocations, and appointments through an admin dashboard
+2. Employees to log in and manage customers, fridges, allocations, and appointments through an admin dashboard.
 
 The system uses ASP.NET Core MVC, Entity Framework, and ASP.NET Identity for authentication and role management.
