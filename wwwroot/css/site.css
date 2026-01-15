@@ -1,0 +1,1327 @@
+html {
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+body {
+    margin-bottom: 60px;
+    background-color: #f8f9fa;
+}
+/* Fixed Footer Styles */
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container.py-4 {
+    flex: 1 0 auto;
+}
+
+.footer {
+    flex-shrink: 0;
+}
+
+/* Ensure footer stays at bottom */
+main {
+    flex: 1;
+}
+
+/*As seen in the admin side*/
+#sidebarToggle {
+    font-size: 1.5rem;
+    margin-left: 15px;
+    margin-top: -2px;
+    padding: 8px 12px;
+}
+
+/* Layout Containers */
+.cart-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.cart-page {
+    padding: 40px 0;
+}
+
+.cart-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin: 0 auto;
+    max-width: 1100px;
+}
+
+/* Cart Section */
+.cart {
+    background-color: #fff;
+    padding: 3vh 4vh;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Summary Section */
+.summary {
+    background-color: #f8f9fa;
+    padding: 3vh 4vh;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+    .summary h4 {
+        text-align: center;
+        margin-bottom: 2vh;
+    }
+
+.summary-section,
+.delivery-section,
+.coupon-section,
+.summary-total {
+    margin-bottom: 25px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.summary-total {
+    border-top: 2px solid #333;
+    padding-top: 15px;
+    margin-top: 20px;
+}
+
+    .summary-total .summary-row {
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+/* Form Elements */
+select,
+input {
+    border: 1px solid rgba(0, 0, 0, 0.137);
+    padding: 1.5vh 1vh;
+    outline: none;
+    width: 100%;
+    background-color: rgb(247, 247, 247);
+    border-radius: 6px;
+}
+
+select {
+    margin-bottom: 6vh;
+}
+
+input {
+    margin-top: 2vh;
+    margin-bottom: 4vh;
+}
+
+/* Single Line Cart Items Layout */
+.cart-item-row {
+    display: flex;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid #eee;
+    gap: 15px;
+}
+
+    .cart-item-row:last-child {
+        border-bottom: none;
+    }
+
+.cart-item-image-container {
+    flex-shrink: 0;
+    width: 80px;
+}
+
+.cart-item-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.cart-item-details {
+    flex: 1;
+    min-width: 150px;
+}
+
+    .cart-item-details h6 {
+        margin: 0;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .cart-item-details p {
+        margin: 5px 0 0;
+        color: #666;
+        font-size: 14px;
+    }
+
+.quantity-controls {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 30px;
+    margin-left: 20px;
+}
+
+.quantity-btn {
+    color: black;
+    width: 32px;
+    height: 32px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 18px;
+    text-decoration: none;
+}
+
+    .quantity-btn:hover {
+        background: #f8f9fa;
+        color: black;
+        text-decoration: none;
+    }
+
+.quantity-display {
+    min-width: 40px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.heart-icon {
+    flex-shrink: 0;
+    margin-right: 15px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+    .heart-icon i {
+        transition: color 0.3s ease;
+        color: #ccc;
+    }
+
+    .heart-icon:hover {
+        text-decoration: none;
+    }
+
+        .heart-icon:hover i {
+            color: #dc3545;
+        }
+
+    .heart-icon.active i,
+    .heart-icon.favorited i {
+        color: #dc3545;
+    }
+
+.cart-item-price {
+    flex-shrink: 0;
+    font-weight: 600;
+    font-size: 18px;
+    color: #333;
+    margin-right: 10px;
+}
+
+.remove-btn {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #999;
+    cursor: pointer;
+    padding: 5px;
+    line-height: 1;
+}
+
+    .remove-btn:hover {
+        color: #dc3545;
+    }
+
+/* Buttons */
+.btn {
+    background-color: #000;
+    border-color: #000;
+    color: white;
+    width: auto;
+    font-size: 0.9rem;
+    padding: 1vh;
+    border-radius: 6px;
+    margin-top: 4vh;
+}
+
+    .btn:hover {
+        background-color: #333;
+        color: white;
+    }
+
+/* Back to Shop */
+.back-to-shop {
+    margin-top: auto;
+    padding: 6px 12px;
+}
+
+/* Links */
+a {
+    color: black;
+    text-decoration: none;
+}
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+/* Checkout Page Specific Styles */
+.checkout-page .container {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 30px;
+    margin-top: 20px;
+}
+
+.checkout-page .card {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.checkout-page .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    font-weight: 600;
+}
+
+.checkout-page .form-control,
+.checkout-page .form-select {
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 12px;
+    background-color: white;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.checkout-page .btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+    margin-top: 0;
+}
+
+    .checkout-page .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
+
+.checkout-page .btn-outline-secondary {
+    background-color: white;
+    border-color: #6c757d;
+    color: #6c757d;
+    margin-top: 0;
+}
+
+    .checkout-page .btn-outline-secondary:hover {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: white;
+    }
+
+/* Override any potential black backgrounds on checkout */
+.checkout-page * {
+    background-color: inherit;
+}
+
+.checkout-page h2,
+.checkout-page h4,
+.checkout-page h6 {
+    color: #333;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .cart-container {
+        max-width: 95%;
+    }
+}
+
+@media (max-width: 768px) {
+    .cart-container {
+        padding: 0 10px;
+    }
+
+    .cart {
+        padding: 2vh 3vh;
+    }
+
+    .summary {
+        padding: 2vh 3vh;
+    }
+
+    .cart-item-row {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .cart-item-image-container {
+        width: 60px;
+    }
+
+    .cart-item-image {
+        width: 60px;
+        height: 60px;
+    }
+
+    .checkout-page .container {
+        padding: 15px;
+        margin-top: 10px;
+    }
+}
+/*Home page styling*/
+.home-page {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.hero-section {
+    background-color: #f8f9fa;
+    color: #333;
+    padding: 80px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+}
+
+.hero-content {
+    max-width: 1200px;
+    width: 100%;
+    padding: 0 40px;
+    display: flex;
+    gap: 60px;
+    align-items: flex-start;
+}
+
+.hero-text {
+    flex: 1;
+    text-align: left;
+    max-width: 500px;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    color: #666;
+}
+
+.hero-description {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #555;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 30px;
+    flex: 1;
+    max-width: 600px;
+}
+
+.service-card {
+    background: white;
+    border-radius: 12px;
+    padding: 30px 25px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+    .service-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+
+.service-icon {
+    margin-bottom: 20px;
+    color: #667eea;
+}
+
+.service-card:nth-child(1) .service-icon {
+    color: #4ecdc4;
+}
+
+.service-card:nth-child(2) .service-icon {
+    color: #45b7d1;
+}
+
+.service-card:nth-child(3) .service-icon {
+    color: #f39c12;
+}
+
+.service-card:nth-child(4) .service-icon {
+    color: #e74c3c;
+}
+
+.service-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #333;
+}
+
+.service-description {
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+
+.service-link {
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.8rem;
+}
+
+    .service-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+.service-card:nth-child(1) .service-link {
+    background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+}
+
+.service-card:nth-child(2) .service-link {
+    background: linear-gradient(135deg, #45b7d1 0%, #2980b9 100%);
+}
+
+.service-card:nth-child(3) .service-link {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+}
+
+.service-card:nth-child(4) .service-link {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+@media (max-width: 768px) {
+    .hero-content {
+        flex-direction: column;
+        gap: 40px;
+        align-items: center;
+    }
+
+    .hero-text {
+        text-align: center;
+        max-width: 100%;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+
+    .services-grid {
+        max-width: 100%;
+        gap: 20px;
+    }
+
+    .service-card {
+        padding: 25px 20px;
+        aspect-ratio: auto;
+    }
+}
+
+/* Invoice Section - Updated and Enhanced */
+.invoice-body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+.invoice-header {
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 3px solid #3c5882;
+    padding-bottom: 20px;
+}
+
+.invoice-company-name {
+    font-size: 28px;
+    font-weight: bold;
+    color: #3c5882;
+    margin-bottom: 5px;
+}
+
+.invoice-subtitle {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.invoice-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 15px;
+}
+
+.invoice-order-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+    .invoice-order-info > div {
+        flex: 1;
+    }
+
+.order-details {
+    text-align: left;
+}
+
+.billing-details {
+    text-align: right;
+}
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+    .invoice-table th,
+    .invoice-table td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+    }
+
+    .invoice-table th {
+        background-color: #3c5882;
+        color: white;
+        font-weight: bold;
+    }
+
+    .invoice-table tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+.invoice-total-section {
+    float: right;
+    width: 300px;
+    margin-top: 20px;
+}
+
+.invoice-total-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid #3c5882;
+}
+
+    .invoice-total-table td {
+        border: 1px solid #ddd;
+        padding: 12px;
+    }
+
+.invoice-total-row {
+    font-weight: bold;
+    background-color: #f8f9fa;
+    font-size: 16px;
+}
+
+.invoice-footer {
+    clear: both;
+    margin-top: 50px;
+    text-align: center;
+    color: #666;
+}
+
+.thank-you {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.contact-info {
+    font-size: 14px;
+    color: #888;
+}
+
+/* Text alignment utilities */
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-align-right {
+    text-align: right;
+}
+
+.strong {
+    font-weight: bold;
+}
+
+.invoice-buttons {
+    margin-top: 20px;
+}
+
+.invoice-print-btn {
+    padding: 10px 20px;
+    background: #3c5882;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+    .invoice-print-btn:hover {
+        background: #2a4168;
+    }
+
+.invoice-close-btn {
+    padding: 10px 20px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    .invoice-close-btn:hover {
+        background: #545b62;
+    }
+
+/* PDF Invoice Button Styles */
+.btn-download-invoice {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+    .btn-download-invoice:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-download-invoice:active {
+        transform: translateY(0);
+    }
+
+    .btn-download-invoice i {
+        font-size: 18px;
+    }
+
+/* Order Confirmation Success Alert Enhancement */
+.order-success-alert {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    border: 2px solid #28a745;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+    .order-success-alert h2 {
+        color: #155724;
+        margin-bottom: 15px;
+    }
+
+    .order-success-alert p {
+        color: #155724;
+        margin-bottom: 0;
+        font-size: 16px;
+    }
+
+/* Order Details Card Enhancement */
+.order-details-card {
+    border: none;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+    .order-details-card .card-header {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+        border-bottom: none;
+        padding: 20px;
+    }
+
+    .order-details-card .card-body {
+        padding: 25px;
+    }
+
+/* Action Buttons Container */
+.order-actions {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+    .order-actions .btn {
+        margin: 0 5px;
+    }
+
+/* Status Badge Enhancement */
+.status-badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+    .status-badge.pending {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .status-badge.processing {
+        background-color: #cce5ff;
+        color: #004085;
+        border: 1px solid #99d6ff;
+    }
+
+    .status-badge.completed {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #a3d9a5;
+    }
+
+/* Order Items Table Enhancement */
+.order-items-header {
+    background: #f8f9fa;
+    padding: 15px 0;
+    margin: 20px 0 10px 0;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.order-item-row {
+    padding: 12px 0;
+    border-bottom: 1px solid #e9ecef;
+    transition: background-color 0.2s ease;
+}
+
+    .order-item-row:hover {
+        background-color: #f8f9fa;
+        border-radius: 6px;
+    }
+
+    .order-item-row:last-child {
+        border-bottom: none;
+    }
+
+/* Order Total Section Enhancement */
+.order-total-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border-left: 4px solid #28a745;
+}
+
+    .order-total-section .total-row {
+        font-size: 18px;
+        font-weight: 700;
+        color: #28a745;
+        padding-top: 10px;
+        border-top: 2px solid #28a745;
+        margin-top: 10px;
+    }
+
+/* Print styles */
+@media print {
+    .invoice-body {
+        margin: 0;
+    }
+
+    .no-print {
+        display: none;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .btn-download-invoice {
+        width: 100%;
+        justify-content: center;
+        margin: 10px 0;
+    }
+
+    .order-actions {
+        text-align: center;
+    }
+
+        .order-actions .btn {
+            width: 100%;
+            margin: 5px 0;
+        }
+
+    .invoice-order-info {
+        flex-direction: column;
+    }
+
+    .billing-details {
+        text-align: left;
+        margin-top: 20px;
+    }
+
+    .invoice-total-section {
+        width: 100%;
+        float: none;
+    }
+}
+/* PDF Invoice Generation Styles - Add to bottom of site.css */
+.pdf-invoice-body {
+    font-family: Arial, sans-serif;
+    margin: 15px;
+    color: #333;
+    font-size: 12px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.pdf-content {
+    flex: 1;
+}
+
+.pdf-invoice-header {
+    text-align: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #3c5882;
+    padding-bottom: 15px;
+}
+
+.pdf-company-name {
+    font-size: 24px;
+    font-weight: bold;
+    color: #3c5882;
+    margin-bottom: 3px;
+}
+
+.pdf-subtitle {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.pdf-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 10px;
+}
+
+.pdf-invoice-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-size: 11px;
+}
+
+.pdf-order-details, .pdf-billing-details {
+    flex: 1;
+}
+
+.pdf-billing-details {
+    text-align: right;
+}
+
+.pdf-invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    font-size: 11px;
+}
+
+    .pdf-invoice-table th,
+    .pdf-invoice-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    .pdf-invoice-table th {
+        background-color: #3c5882;
+        color: white;
+        font-weight: bold;
+        font-size: 10px;
+    }
+
+    .pdf-invoice-table tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+.pdf-text-center {
+    text-align: center;
+}
+
+.pdf-text-right {
+    text-align: right;
+}
+
+.pdf-strong {
+    font-weight: bold;
+}
+
+.pdf-invoice-totals {
+    width: 250px;
+    margin-left: auto;
+    margin-top: 10px;
+    font-size: 11px;
+}
+
+.pdf-totals-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #3c5882;
+}
+
+    .pdf-totals-table td {
+        border: 1px solid #ddd;
+        padding: 6px 10px;
+    }
+
+.pdf-total-row {
+    font-weight: bold;
+    background-color: #f8f9fa;
+    font-size: 12px;
+}
+
+.pdf-invoice-footer {
+    margin-top: auto;
+    text-align: center;
+    font-size: 10px;
+    color: #666;
+    padding-top: 40px;
+    border-top: 1px solid #ddd;
+}
+
+.pdf-thank-you {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+
+.product-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    height: 350px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    }
+
+.product-img {
+    max-height: 150px;
+    width: auto;
+    margin: 0 auto 10px auto;
+    object-fit: contain;
+}
+
+.product-title {
+    font-weight: 600;
+    margin: 10px 0 5px;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.product-price {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #28a745;
+    margin-bottom: 10px;
+}
+
+.product-description {
+    font-size: 0.9rem;
+    color: #666;
+    flex-grow: 1;
+    margin-bottom: 10px;
+}
+
+.product-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: auto;
+}
+
+    .product-actions .btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        border-radius: 6px;
+    }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .product-card {
+        height: auto;
+        padding: 12px;
+    }
+
+    .product-img {
+        max-height: 120px;
+    }
+
+    .product-title {
+        font-size: 1rem;
+    }
+
+    .product-price {
+        font-size: 0.9rem;
+    }
+}
+/* Keep table cells neat and centered */
+.product-table td,
+.product-table th {
+    vertical-align: middle;
+    text-align: center;
+    padding: 12px;
+}
+
+/* Fixed-size square box for images */
+.product-image-box {
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    /* border: 1px solid #eee;*/
+    border-radius: 8px;
+    /*background-color: #fafafa;*/
+    overflow: hidden;
+}
+
+/* Images scale proportionally inside box */
+.product-table-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Handle long descriptions in table */
+.product-desc-cell {
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer; /* shows tooltip on hover */
+}
+/* Snowflake Logo Styles for Fridge Frenzy */
+.snowflake-logo {
+    display: inline-flex;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.snowflake-icon {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    margin-right: 10px;
+    background: linear-gradient(135deg, #4fc3f7, #29b6f6);
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+    .snowflake-icon:before,
+    .snowflake-icon:after {
+        content: '';
+        position: absolute;
+        background-color: white;
+        border-radius: 2px;
+    }
+
+    /* Create snowflake shape */
+    .snowflake-icon:before {
+        width: 4px;
+        height: 16px;
+        top: 8px;
+        left: 14px;
+    }
+
+    .snowflake-icon:after {
+        width: 16px;
+        height: 4px;
+        top: 14px;
+        left: 8px;
+    }
+
+    /* Snowflake arms */
+    .snowflake-icon i {
+        position: absolute;
+        width: 4px;
+        height: 8px;
+        background-color: white;
+        border-radius: 2px;
+    }
+
+        .snowflake-icon i:nth-child(1) {
+            transform: rotate(45deg);
+            top: 4px;
+            left: 4px;
+        }
+
+        .snowflake-icon i:nth-child(2) {
+            transform: rotate(-45deg);
+            top: 4px;
+            right: 4px;
+        }
+
+        .snowflake-icon i:nth-child(3) {
+            transform: rotate(45deg);
+            bottom: 4px;
+            right: 4px;
+        }
+
+        .snowflake-icon i:nth-child(4) {
+            transform: rotate(-45deg);
+            bottom: 4px;
+            left: 4px;
+        }
+
+/* Alternative: Using Font Awesome snowflake icon */
+.snowflake-fa {
+    color: #4fc3f7;
+    margin-right: 10px;
+    font-size: 1.8rem;
+    text-shadow: 0 0 5px rgba(79, 195, 247, 0.5);
+}
+
+/* Logo variations for different backgrounds */
+.snowflake-logo-dark {
+    color: #2c3e50;
+}
+
+.snowflake-logo-light {
+    color: #ffffff;
+}
+
+/* Responsive logo sizing */
+@media (max-width: 768px) {
+    .snowflake-logo {
+        font-size: 1.2rem;
+    }
+
+    .snowflake-icon {
+        width: 28px;
+        height: 28px;
+        margin-right: 8px;
+    }
+
+        .snowflake-icon:before {
+            width: 3px;
+            height: 14px;
+            top: 7px;
+            left: 12.5px;
+        }
+
+        .snowflake-icon:after {
+            width: 14px;
+            height: 3px;
+            top: 12.5px;
+            left: 7px;
+        }
+
+        .snowflake-icon i {
+            width: 3px;
+            height: 7px;
+        }
+
+    .snowflake-fa {
+        font-size: 1.5rem;
+        margin-right: 8px;
+    }
+}
