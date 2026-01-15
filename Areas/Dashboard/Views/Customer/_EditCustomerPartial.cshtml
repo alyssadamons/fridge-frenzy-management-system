@@ -1,0 +1,198 @@
+﻿@model E_Commerce.Areas.Dashboard.Models.Customer
+
+<div class="modal-header bg-warning text-dark">
+    <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Customer</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body">
+    <div class="alert-container mb-3"></div>
+
+    <form id="editCustomerForm" asp-action="EditModal" method="post" asp-controller="Customer" asp-area="Dashboard">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="CustomerID" />
+        <!-- ADD THIS HIDDEN FIELD -->
+        <input type="hidden" asp-for="IdentityUserId" />
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Company Name</label>
+            <input asp-for="Name" class="form-control" autocomplete="organization" required />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Owner" class="form-label">Contact Person</label>
+            <input asp-for="Owner" class="form-control" autocomplete="name" />
+            <span asp-validation-for="Owner" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="ContactNumber" class="form-label">Phone Number</label>
+            <input asp-for="ContactNumber" class="form-control" maxlength="10" autocomplete="tel" required />
+            <span asp-validation-for="ContactNumber" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label">Email Address</label>
+            <input asp-for="Email" class="form-control" autocomplete="email" required />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label asp-for="StreetNumber" class="form-label">Street Number</label>
+                <input asp-for="StreetNumber" class="form-control" autocomplete="address-line1" />
+                <span asp-validation-for="StreetNumber" class="text-danger"></span>
+            </div>
+            <div class="col-md-5 mb-3">
+                <label asp-for="StreetName" class="form-label">Street Name</label>
+                <input asp-for="StreetName" class="form-control" autocomplete="address-line1" />
+                <span asp-validation-for="StreetName" class="text-danger"></span>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="Suburb" class="form-label">Suburb</label>
+                <input asp-for="Suburb" class="form-control" autocomplete="address-level2" />
+                <span asp-validation-for="Suburb" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label asp-for="City" class="form-label">City</label>
+                <input asp-for="City" class="form-control" autocomplete="address-level1" />
+                <span asp-validation-for="City" class="text-danger"></span>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label asp-for="PostalCode" class="form-label">Postal Code</label>
+                <input asp-for="PostalCode" class="form-control" maxlength="4" autocomplete="postal-code" />
+                <span asp-validation-for="PostalCode" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Notes" class="form-label">Additional Notes</label>
+            <textarea asp-for="Notes" class="form-control" rows="3" autocomplete="off"></textarea>
+        </div>
+
+        <!-- Password Reset Section - Improved Layout -->
+        <div class="card border-warning mb-4">
+            <div class="card-header bg-warning bg-opacity-10 py-2">
+                <h6 class="mb-0"><i class="fas fa-key me-2"></i>Reset Password (Optional)</h6>
+            </div>
+            <div class="card-body py-3">
+                <div class="alert alert-info mb-3 py-2">
+                    <small class="d-flex align-items-center">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <span><strong>Leave blank to keep current password.</strong> Enter a new password only if you want to change it.</span>
+                    </small>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="newPasswordEdit" class="form-label fw-semibold">New Password</label>
+                        <div class="input-group input-group-sm">
+                            <input type="password" class="form-control form-control-sm" id="newPasswordEdit" name="newPassword"
+                                   placeholder="Leave blank to keep current" autocomplete="new-password">
+                            <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="togglePasswordVisibility('newPasswordEdit', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <small class="form-text text-muted mt-1">Minimum 6 characters if changing</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="confirmPasswordEdit" class="form-label fw-semibold">Confirm Password</label>
+                        <div class="input-group input-group-sm">
+                            <input type="password" class="form-control form-control-sm" id="confirmPasswordEdit"
+                                   placeholder="Confirm new password" autocomplete="new-password">
+                            <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="togglePasswordVisibility('confirmPasswordEdit', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <small class="form-text text-muted mt-1">Re-enter the new password</small>
+                    </div>
+                </div>
+
+                <div id="passwordFeedback" class="mt-2"></div>
+            </div>
+        </div>
+
+        <div class="form-check mb-3">
+            <input asp-for="IsActive" class="form-check-input" type="checkbox" autocomplete="off" />
+            <label asp-for="IsActive" class="form-check-label">Active Customer</label>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="button" class="btn btn-warning" id="updateCustomerBtn" onclick="submitCustomerForm()">
+        <i class="fas fa-save"></i> Update Customer
+    </button>
+</div>
+
+<script>
+    // Improved password visibility toggle
+    function togglePasswordVisibility(passwordFieldId, button) {
+        const passwordField = document.getElementById(passwordFieldId);
+        const icon = button.querySelector('i');
+
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+            button.classList.add('btn-primary');
+            button.classList.remove('btn-outline-secondary');
+        } else {
+            passwordField.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+            button.classList.remove('btn-primary');
+            button.classList.add('btn-outline-secondary');
+        }
+    }
+
+    // Real-time password validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const newPasswordField = document.getElementById('newPasswordEdit');
+        const confirmPasswordField = document.getElementById('confirmPasswordEdit');
+        const feedbackDiv = document.getElementById('passwordFeedback');
+
+        function validatePasswords() {
+            const newPass = newPasswordField.value;
+            const confirmPass = confirmPasswordField.value;
+
+            // Clear feedback if both fields are empty
+            if (newPass.length === 0 && confirmPass.length === 0) {
+                feedbackDiv.innerHTML = '';
+                return true;
+            }
+
+            // Check if password is being changed
+            if (newPass.length > 0) {
+                if (newPass.length < 6) {
+                    feedbackDiv.innerHTML = '<div class="alert alert-danger py-2 mb-0"><small><i class="fas fa-times-circle me-1"></i> Password must be at least 6 characters</small></div>';
+                    return false;
+                }
+
+                if (confirmPass.length > 0) {
+                    if (newPass !== confirmPass) {
+                        feedbackDiv.innerHTML = '<div class="alert alert-danger py-2 mb-0"><small><i class="fas fa-times-circle me-1"></i> Passwords do not match</small></div>';
+                        return false;
+                    } else {
+                        feedbackDiv.innerHTML = '<div class="alert alert-success py-2 mb-0"><small><i class="fas fa-check-circle me-1"></i> Passwords match</small></div>';
+                        return true;
+                    }
+                }
+            }
+
+            feedbackDiv.innerHTML = '';
+            return true;
+        }
+
+        if (newPasswordField && confirmPasswordField) {
+            newPasswordField.addEventListener('input', validatePasswords);
+            confirmPasswordField.addEventListener('input', validatePasswords);
+        }
+    });
+</script>

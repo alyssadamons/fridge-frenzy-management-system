@@ -1,0 +1,77 @@
+﻿@model E_Commerce.Areas.Dashboard.Models.Employee
+
+<div class="modal-header bg-warning text-dark">
+    <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Employee</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <form id="editEmployeeForm" asp-action="EditModal" method="post">
+        <input type="hidden" asp-for="EmployeeID" />
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label asp-for="FirstName" class="form-label">First Name</label>
+                    <input asp-for="FirstName" class="form-control" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label asp-for="LastName" class="form-label">Last Name</label>
+                    <input asp-for="LastName" class="form-control" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="ContactNumber" class="form-label">Contact Number</label>
+            <input asp-for="ContactNumber" class="form-control" maxlength="10" />
+            <span asp-validation-for="ContactNumber" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Position" class="form-label">Position</label>
+            <select asp-for="Position" class="form-control">
+                <option value="Technician">Technician</option>
+                <option value="Sales">Sales Representative</option>
+                <option value="CustomerManager">Customer Manager</option>
+            </select>
+            <span asp-validation-for="Position" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="JobTitle" class="form-label">Job Title</label>
+            <input asp-for="JobTitle" class="form-control" />
+            <span asp-validation-for="JobTitle" class="text-danger"></span>
+        </div>
+
+        <!-- Editable credentials -->
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label">Email Address</label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="GeneratedPassword" class="form-label">Password</label>
+            <input asp-for="GeneratedPassword" class="form-control" placeholder="Leave empty to keep current password" />
+            <span asp-validation-for="GeneratedPassword" class="text-danger"></span>
+            <small class="form-text text-muted">Enter new password or leave empty to keep current one</small>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox" asp-for="IsActive" class="form-check-input" />
+            <label asp-for="IsActive" class="form-check-label">Active</label>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="button" class="btn btn-warning" onclick="submitModalForm(document.getElementById('editEmployeeForm'))">
+        <i class="fas fa-save"></i> Update
+    </button>
+</div>

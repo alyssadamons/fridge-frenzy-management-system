@@ -1,0 +1,190 @@
+﻿@model E_Commerce.Areas.Dashboard.Models.Customer
+
+<div class="modal-header bg-success text-white">
+    <h5 class="modal-title"><i class="fas fa-user-plus"></i> Add New Customer</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <form id="createCustomerForm"
+          asp-action="CreateModal"
+          asp-controller="Customer"
+          asp-area="Dashboard"
+          method="post"
+          data-debug="true">
+
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="IsAjaxRequest" value="true" />
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Company Name *</label>
+            <input asp-for="Name" class="form-control" placeholder="e.g. Cool Fridges Ltd." required />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Owner" class="form-label">Owner Name</label>
+            <input asp-for="Owner" class="form-control" placeholder="e.g. John Doe" />
+            <span asp-validation-for="Owner" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="ContactNumber" class="form-label">Contact Number *</label>
+            <input asp-for="ContactNumber" class="form-control" maxlength="10" pattern="^0\d{9}$" placeholder="0812345678" required />
+            <span asp-validation-for="ContactNumber" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label">Email Address</label>
+            <input asp-for="Email" class="form-control" type="email" placeholder="e.g. support@coolfridges.com" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label asp-for="StreetNumber" class="form-label">Street No.</label>
+                <input asp-for="StreetNumber" class="form-control" />
+                <span asp-validation-for="StreetNumber" class="text-danger"></span>
+            </div>
+            <div class="col-md-5 mb-3">
+                <label asp-for="StreetName" class="form-label">Street Name</label>
+                <input asp-for="StreetName" class="form-control" />
+                <span asp-validation-for="StreetName" class="text-danger"></span>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="Suburb" class="form-label">Suburb</label>
+                <input asp-for="Suburb" class="form-control" />
+                <span asp-validation-for="Suburb" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label asp-for="City" class="form-label">City</label>
+                <input asp-for="City" class="form-control" />
+                <span asp-validation-for="City" class="text-danger"></span>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label asp-for="PostalCode" class="form-label">Postal Code</label>
+                <input asp-for="PostalCode" class="form-control" maxlength="4" pattern="\d{4}" />
+                <span asp-validation-for="PostalCode" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Notes" class="form-label">Additional Notes</label>
+            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Notes" class="text-danger"></span>
+        </div>
+
+        
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="button" class="btn btn-success" onclick="submitModalForm(document.getElementById('createCustomerForm'))">
+        <i class="fas fa-save"></i> Save
+    </button>
+</div>
+
+
+<script>
+    window.submitModalForm = function(form) {
+        console.log('=== CREATE CUSTOMER DEBUG ===');
+
+        // Basic form validation
+        if (!form.checkValidity()) {
+            console.log('Form validation failed');
+            form.reportValidity();
+            return false;
+        }
+
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+        // Create form data
+        const formData = new FormData(form);
+
+        // Add debug flag
+        formData.append('IsDebug', 'true');
+
+        console.log('Form data:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`  ${key}: ${value}`);
+        }
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            }
+        })
+        .then(async response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+            const contentType = response.headers.get('content-type');
+            const responseText = await response.text();
+
+            console.log('Raw response:', responseText);
+
+            if (contentType && contentType.includes('application/json')) {
+                return JSON.parse(responseText);
+            } else {
+                console.error('Server returned non-JSON response');
+                throw new Error(`Server returned ${response.status}: ${responseText.substring(0, 100)}...`);
+            }
+        })
+        .then(data => {
+            console.log('Parsed response:', data);
+
+            if (data && data.success) {
+                console.log('✅ Customer created successfully');
+                showNotification('success', data.message || 'Customer created successfully!');
+
+                // Close modal and refresh
+                setTimeout(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('ajaxModal'));
+                    if (modal) modal.hide();
+                    location.reload();
+                }, 1500);
+            } else {
+                let errorMessage = 'Unknown error occurred';
+                if (data) {
+                    errorMessage = data.error || 'Creation failed';
+                    if (data.errors && data.errors.length > 0) {
+                        errorMessage += ': ' + data.errors.join(', ');
+                    }
+                }
+                console.error('❌ Error:', errorMessage);
+                showNotification('error', errorMessage);
+
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            console.error('❌ Fetch error:', error);
+            showNotification('error', 'Error: ' + error.message);
+
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
+
+        return false;
+    }
+
+    function showNotification(type, message) {
+        // Use your preferred notification method
+        if (type === 'success') {
+            alert('✅ ' + message);
+        } else {
+            alert('❌ ' + message);
+        }
+    }
+</script>

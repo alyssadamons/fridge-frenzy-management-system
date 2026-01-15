@@ -1,0 +1,42 @@
+﻿@page
+@model E_Commerce.Areas.Identity.Pages.Account.ConfirmEmailChangeModel
+@{
+    ViewData["Title"] = "Confirm Email Change";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+
+        <div class="card shadow-lg border-0 rounded-3">
+            <div class="card-header bg-primary text-white text-center">
+                <h3>@ViewData["Title"]</h3>
+            </div>
+            <div class="card-body text-center">
+
+                @if (!string.IsNullOrEmpty(Model.StatusMessage))
+                {
+                    if (Model.StatusMessage.Contains("Thank you") || Model.StatusMessage.Contains("updated"))
+                    {
+                        <div class="alert alert-success" role="alert">
+                            @Model.StatusMessage
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @Model.StatusMessage
+                        </div>
+                    }
+                }
+
+                <a asp-page="/Account/Manage/Email" asp-area="Identity" class="btn btn-outline-primary mt-3">
+                    Back to Manage Email
+                </a>
+                <a asp-page="/Index" class="btn btn-outline-secondary mt-3 ms-2">
+                    Home
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>

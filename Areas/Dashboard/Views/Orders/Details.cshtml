@@ -1,0 +1,104 @@
+﻿@model E_Commerce.Models.Order
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mt-4">Order Details #@Model.Id</h1>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning me-2">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Orders
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Order Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Order Date:</dt>
+                        <dd class="col-sm-8">@Model.OrderDate.ToString("dd MMMM yyyy HH:mm")</dd>
+
+                        <dt class="col-sm-4">Status:</dt>
+                        <dd class="col-sm-8">
+                            @{
+                                string badgeClass = Model.Status switch
+                                {
+                                    "Delivered" => "bg-success",
+                                    "Pending" => "bg-warning",
+                                    "Cancelled" => "bg-danger",
+                                    "Processing" => "bg-info",
+                                    "Shipped" => "bg-primary",
+                                    "Confirmed" => "bg-secondary",
+                                    _ => "bg-dark"
+                                };
+                            }
+                            <span class="badge @badgeClass">@Model.Status</span>
+                        </dd>
+
+                        <dt class="col-sm-4">Customer:</dt>
+                        <dd class="col-sm-8">@Model.CustomerName</dd>
+
+                        <dt class="col-sm-4">Phone:</dt>
+                        <dd class="col-sm-8">@Model.CustomerPhone</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Delivery Address:</dt>
+                        <dd class="col-sm-8">@Model.DeliveryAddress</dd>
+
+                        <dt class="col-sm-4">Subtotal:</dt>
+                        <dd class="col-sm-8">R @Model.SubTotal.ToString("N2")</dd>
+
+                        <dt class="col-sm-4">Delivery Fee:</dt>
+                        <dd class="col-sm-8">R @Model.DeliveryFee.ToString("N2")</dd>
+
+                        <dt class="col-sm-4">Total:</dt>
+                        <dd class="col-sm-8"><strong>R @Model.Total.ToString("N2")</strong></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Order Items</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Product</th>
+                            <th class="text-center">Quantity</th>
+                            <th class="text-end">Price</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.OrderItems)
+                        {
+                            <tr>
+                                <td>@item.Product.Name</td>
+                                <td class="text-center">@item.Quantity</td>
+                                <td class="text-end">R @item.Price.ToString("N2")</td>
+                                <td class="text-end">R @((item.Quantity * item.Price).ToString("N2"))</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,33 @@
+﻿@using E_Commerce.Areas.Dashboard.Models
+@model IEnumerable<Appointment>
+
+@{
+    Layout = null; // clean export
+}
+
+<h2 style="text-align:center">Appointments Report</h2>
+<table style="width:100%; border-collapse:collapse;" border="1" cellpadding="5">
+    <thead>
+        <tr style="background-color:#f2f2f2;">
+            <th>Company</th>
+            <th>Contact</th>
+            <th>Technician</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Issue</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var a in Model)
+        {
+            <tr>
+                <td>@a.Customer?.Name</td>
+                <td>@a.Customer?.ContactNumber</td>
+                <td>@($"{a.Employee?.FirstName} {a.Employee?.LastName}")</td>
+                <td>@a.StartTime.ToString("g")</td>
+                <td>@a.EndTime.ToString("g")</td>
+                <td>@a.IssueType</td>
+            </tr>
+        }
+    </tbody>
+</table>

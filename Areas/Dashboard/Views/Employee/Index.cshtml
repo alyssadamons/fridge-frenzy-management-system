@@ -1,0 +1,374 @@
+﻿@model IEnumerable<E_Commerce.Areas.Dashboard.Models.Employee>
+
+@{
+    ViewData["Title"] = "Employees";
+    Layout = "~/Areas/Dashboard/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-users"></i> Employee Management</h2>
+        <button type="button" class="btn btn-primary" onclick="openModal('@Url.Action("CreateModal", "Employee", new { area = "Dashboard" })')">
+            <i class="fas fa-plus"></i> Add New Employee
+        </button>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="Index">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Search by Name</label>
+                        <input type="text" name="searchName" class="form-control"
+                               value="@ViewData["SearchName"]" placeholder="First or Last Name">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Search by Job Title</label>
+                        <input type="text" name="searchJobTitle" class="form-control"
+                               value="@ViewData["SearchJobTitle"]" placeholder="Job Title">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-redo"></i> Clear
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Employees Table -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="employeeTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>
+                                <a asp-action="Index"
+                                   asp-route-sortOrder="@ViewData["NameSortParam"]"
+                                   asp-route-searchName="@ViewData["SearchName"]"
+                                   asp-route-searchJobTitle="@ViewData["SearchJobTitle"]">
+                                    Name
+                                    <i class="fas fa-sort"></i>
+                                </a>
+                            </th>
+                            <th>
+                                <a asp-action="Index"
+                                   asp-route-sortOrder="@ViewData["JobTitleSortParam"]"
+                                   asp-route-searchName="@ViewData["SearchName"]"
+                                   asp-route-searchJobTitle="@ViewData["SearchJobTitle"]">
+                                    Job Title
+                                    <i class="fas fa-sort"></i>
+                                </a>
+                            </th>
+                            <th>Contact</th>
+                            <th>Email</th>
+                            <th>Position</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var employee in Model)
+                            {
+                                <tr>
+                                    <td>@employee.FirstName @employee.LastName</td>
+                                    <td>@employee.JobTitle</td>
+                                    <td>@employee.ContactNumber</td>
+                                    <td>@employee.Email</td>
+                                    <td>
+                                        <span class="badge bg-info">@employee.Position</span>
+                                    </td>
+                                    <td>
+                                        @if (employee.IsActive)
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button type="button" class="btn btn-outline-info btn-sm"
+                                                    onclick="openModal('@Url.Action("ViewModal", "Employee", new { area = "Dashboard", id = employee.EmployeeID })')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-warning btn-sm"
+                                                    onclick="openModal('@Url.Action("EditModal", "Employee", new { area = "Dashboard", id = employee.EmployeeID })')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm"
+                                                    onclick="openModal('@Url.Action("DeleteModal", "Employee", new { area = "Dashboard", id = employee.EmployeeID })')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">
+                                    <i class="fas fa-info-circle"></i> No employees found
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AJAX Modal - SAME AS CUSTOMER -->
+<div class="modal fade" id="ajaxModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" id="ajaxModalContent"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+         function openModal(url, size = 'lg') {  // Default to large modal
+            console.log('Opening modal from URL:', url);
+            fetch(url)
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed to load modal');
+                    return res.text();
+                })
+                .then(html => {
+                    console.log('Modal HTML loaded successfully');
+                    document.getElementById('ajaxModalContent').innerHTML = html;
+                    const modalElement = document.getElementById('ajaxModal');
+                    const modalDialog = modalElement.querySelector('.modal-dialog');
+
+                    // Reset all size classes
+                    modalDialog.classList.remove('modal-sm', 'modal-md', 'modal-lg', 'modal-xl');
+
+                    // Set modal size
+                    if (size === 'xl') {
+                        modalDialog.classList.add('modal-xl');
+                    } else if (size === 'lg') {
+                        modalDialog.classList.add('modal-lg');
+                    } else if (size === 'sm') {
+                        modalDialog.classList.add('modal-sm');
+                    } else {
+                        modalDialog.classList.add('modal-md');
+                    }
+
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error loading modal:', error);
+                    alert('Error loading modal content');
+                });
+        }
+
+
+                function submitModalForm(form) {
+            console.log('Submitting form:', form.action);
+
+            // Find the submit button more safely
+            const submitBtn = form.querySelector('button[type="button"]') ||
+                             form.closest('.modal-content').querySelector('.btn-success') ||
+                             document.querySelector('button[onclick*="submitModalForm"]');
+
+            let originalText = '';
+            if (submitBtn) {
+                originalText = submitBtn.innerHTML;
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+            }
+
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: form.method,
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => {
+                const contentType = res.headers.get('content-type');
+                console.log('Response content-type:', contentType);
+
+                if (contentType && contentType.includes('application/json')) {
+                    return res.json();
+                }
+                // If not JSON, try to parse as text first to see what we got
+                return res.text().then(html => {
+                    console.log('Got HTML response, trying to parse as JSON might have failed');
+                    // Try to see if there's any JSON in the response
+                    try {
+                        const jsonMatch = html.match(/\{.*\}/);
+                        if (jsonMatch) {
+                            return JSON.parse(jsonMatch[0]);
+                        }
+                    } catch (e) {
+                        console.log('Could not extract JSON from HTML response');
+                    }
+                    throw new Error('Server returned HTML instead of JSON');
+                });
+            })
+                    .then(data => {
+            console.log('Server response:', data);
+            if (data.success) {
+                // Show success message with credentials
+                showSuccessMessage(data.credentials || data);
+            } else {
+                // Show error message with ALL error details
+                const errorMsg = data.error || 'An error occurred';
+                const detailedErrors = data.errors ? data.errors.join('\n') : '';
+                alert(`${errorMsg}${detailedErrors ? '\n\nErrors:\n' + detailedErrors : ''}`);
+
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        })
+            .catch(err => {
+                console.error('Error submitting form:', err);
+                alert('An error occurred while submitting the form. Please check the console for details.');
+
+                // Re-enable button if it exists
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            });
+
+            return false;
+        }
+
+        // Email and Password Generation Functions
+        function initializeCredentialPreview() {
+            console.log('Initializing credential preview...');
+
+            const firstNameInput = document.getElementById('FirstName');
+            const lastNameInput = document.getElementById('LastName');
+            const positionSelect = document.getElementById('Position');
+
+            if (firstNameInput && lastNameInput && positionSelect) {
+                console.log('All inputs found, attaching event listeners');
+
+                // Attach event listeners
+                firstNameInput.addEventListener('input', updateCredentialPreview);
+                lastNameInput.addEventListener('input', updateCredentialPreview);
+                positionSelect.addEventListener('change', updateCredentialPreview);
+
+                // Initial update
+                updateCredentialPreview();
+            } else {
+                console.log('Some inputs not found:', {
+                    firstName: !!firstNameInput,
+                    lastName: !!lastNameInput,
+                    position: !!positionSelect
+                });
+            }
+        }
+
+                function updateCredentialPreview() {
+            const firstName = document.getElementById('FirstName')?.value.trim();
+            const lastName = document.getElementById('LastName')?.value.trim();
+            const position = document.getElementById('Position')?.value;
+
+            console.log('Updating credentials:', { firstName, lastName, position });
+
+            if (firstName && lastName && position) {
+                // Remove spaces and special characters from email
+                const cleanFirstName = firstName.toLowerCase().replace(/\s+/g, '');
+                const cleanLastName = lastName.toLowerCase().replace(/\s+/g, '');
+                const email = `${cleanFirstName}.${cleanLastName}@@fridgefrenzy.com`;
+
+                let password = '';
+
+                // Generate password based on position
+                if (position === 'Technician') {
+                    password = `${firstName[0].toUpperCase()}${lastName[0].toUpperCase()}tech2023!`;
+                } else if (position === 'Sales') {
+                    password = `${firstName[0].toUpperCase()}${lastName[0].toUpperCase()}_sales2023!`;
+                } else if (position === 'CustomerManager') {
+                    password = `${firstName[0].toUpperCase()}${lastName[0].toUpperCase()}cm2023!`;
+                }
+
+                const emailEl = document.getElementById('generatedEmail');
+                const passwordEl = document.getElementById('generatedPassword');
+
+                if (emailEl) {
+                    emailEl.textContent = email;
+                    emailEl.className = 'text-success fw-bold';
+                }
+                if (passwordEl) {
+                    passwordEl.textContent = password;
+                    passwordEl.className = 'text-success fw-bold';
+                }
+
+                console.log('Generated credentials:', { email, password });
+            } else {
+                const emailEl = document.getElementById('generatedEmail');
+                const passwordEl = document.getElementById('generatedPassword');
+
+                if (emailEl) {
+                    emailEl.textContent = 'Will be generated automatically';
+                    emailEl.className = 'text-muted';
+                }
+                if (passwordEl) {
+                    passwordEl.textContent = 'Will be generated automatically';
+                    passwordEl.className = 'text-muted';
+                }
+            }
+        }
+        
+
+        function showSuccessMessage(credentials) {
+            const modalBody = document.querySelector('.modal-body');
+            if (modalBody) {
+                let email, password;
+
+                if (typeof credentials === 'string') {
+                    // Handle string format "Email: email | Password: password"
+                    email = credentials.split('Email: ')[1]?.split(' | ')[0];
+                    password = credentials.split('Password: ')[1];
+                } else {
+                    // Handle object format {email: "...", password: "..."}
+                    email = credentials.email;
+                    password = credentials.password;
+                }
+
+                modalBody.innerHTML = `
+                    <div class="alert alert-success">
+                        <h4><i class="fas fa-check-circle"></i> Employee Created Successfully!</h4>
+                        <hr>
+                        <h6>Login Credentials:</h6>
+                        <div class="bg-light p-3 rounded mt-2">
+                            <p class="mb-2"><strong>Email:</strong> <span class="text-primary">${email}</span></p>
+                            <p class="mb-0"><strong>Password:</strong> <span class="text-primary">${password}</span></p>
+                        </div>
+                        <hr>
+                        <small class="text-muted"><i class="fas fa-exclamation-triangle"></i> Please save these credentials securely. This dialog will close in 5 seconds.</small>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('ajaxModal'));
+                    if (modal) modal.hide();
+                    location.reload();
+                }, 5000);
+            }
+        }
+    </script>
+}

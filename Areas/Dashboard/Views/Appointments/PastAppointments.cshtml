@@ -1,0 +1,254 @@
+﻿@model IEnumerable<E_Commerce.Areas.Dashboard.Models.Appointment>
+@{
+    Layout = "~/Areas/Dashboard/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Past / Deleted Appointments";
+}
+
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Past / Deleted Appointments</h1>
+
+        <!-- Header Actions -->
+        <div class="card mb-3 border-0 shadow-sm">
+            <div class="card-body py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title mb-0">Past Appointment Management</h5>
+                        <p class="text-muted mb-0">View and manage completed, cancelled, and deleted appointments</p>
+                    </div>
+                    <div>
+                        <a asp-area="Dashboard" asp-controller="Appointments" asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> Back to Appointments
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" asp-area="Dashboard" asp-controller="Appointments" asp-action="PastAppointments">
+                    <div class="row g-3">
+                        <!-- Search Fields -->
+                        <div class="col-md-4">
+                            <label class="form-label">Search</label>
+                            <input type="text" name="search" value="@ViewBag.SearchString" class="form-control" placeholder="Search appointments...">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Filter By</label>
+                            <select name="filter" class="form-select">
+                                <option value="">All Fields</option>
+                                <option value="customer" selected="@(ViewBag.FilterBy == "customer")">Customer</option>
+                                <option value="technician" selected="@(ViewBag.FilterBy == "technician")">Technician</option>
+                                <option value="issue" selected="@(ViewBag.FilterBy == "issue")">Issue Type</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                            <a asp-area="Dashboard" asp-controller="Appointments" asp-action="PastAppointments" class="btn btn-secondary">
+                                <i class="fas fa-redo"></i> Clear
+                            </a>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end justify-content-end">
+                            <div class="d-flex flex-wrap gap-2">
+                                <a class="btn btn-success" asp-area="Dashboard" asp-controller="Appointments" asp-action="ExportPastExcel">
+                                    <i class="fas fa-file-excel me-1"></i> Excel
+                                </a>
+                                <a class="btn btn-danger" asp-area="Dashboard" asp-controller="Appointments" asp-action="ExportPastPdf">
+                                    <i class="fas fa-file-pdf me-1"></i> PDF
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Past Appointments Table -->
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-header bg-light border-0">
+                <i class="fas fa-history me-1"></i>
+                Past Appointments List
+                <span class="badge bg-secondary ms-2">@Model.Count()</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="align-middle">Customer</th>
+                                <th class="align-middle">Technician</th>
+                                <th class="align-middle">Start Time</th>
+                                <th class="align-middle">End Time</th>
+                                <th class="align-middle">Issue</th>
+                                <th class="align-middle">Notes</th>
+                                <th class="align-middle">Feedback</th>
+                                <th class="align-middle">Status</th>
+                               
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.Any())
+                            {
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted py-4">
+                                        <i class="fas fa-calendar-times fa-2x mb-2 d-block"></i>
+                                        No past appointments found
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var appt in Model)
+                                {
+                                    <tr>
+                                        <td class="align-middle fw-semibold">@(appt.Customer?.Name ?? "N/A")</td>
+                                        <td class="align-middle">
+                                            @if (appt.Employee != null)
+                                            {
+                                                @($"{appt.Employee.FirstName} {appt.Employee.LastName}")
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Not assigned</span>
+                                            }
+                                        </td>
+                                        <td class="align-middle">
+                                            <small class="text-muted">@appt.StartTime.ToString("MMM dd, yyyy")</small>
+                                            <br>
+                                            <small>@appt.StartTime.ToString("HH:mm")</small>
+                                        </td>
+                                        <td class="align-middle">
+                                            <small class="text-muted">@appt.EndTime.ToString("MMM dd, yyyy")</small>
+                                            <br>
+                                            <small>@appt.EndTime.ToString("HH:mm")</small>
+                                        </td>
+                                        <td class="align-middle">@(appt.IssueType ?? "N/A")</td>
+                                        <td class="align-middle">
+                                            @if (!string.IsNullOrEmpty(appt.Notes))
+                                            {
+                                                <span class="text-truncate d-inline-block" style="max-width: 150px;" title="@appt.Notes">
+                                                    @appt.Notes
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">N/A</span>
+                                            }
+                                        </td>
+                                        <td class="align-middle">
+                                            @if (!string.IsNullOrEmpty(appt.TechnicianFaults))
+                                            {
+                                                <span class="text-truncate d-inline-block" style="max-width: 150px;" title="@appt.TechnicianFaults">
+                                                    @appt.TechnicianFaults
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">N/A</span>
+                                            }
+                                        </td>
+                                        <td class="align-middle">
+                                            <span class="badge bg-secondary">@appt.Status</span>
+                                        </td>
+                                        
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- AJAX Modal -->
+<div class="modal fade" id="ajaxModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" id="ajaxModalContent"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ajaxModalEl = document.getElementById('ajaxModal');
+            const ajaxModal = new bootstrap.Modal(ajaxModalEl);
+
+            function openModal(url) {
+                // Use the provided URL directly - it should already be correct
+                fetch(url)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error('Network response was not ok: ' + res.status);
+                        }
+                        return res.text();
+                    })
+                    .then(html => {
+                        document.getElementById('ajaxModalContent').innerHTML = html;
+                        ajaxModal.show();
+                    })
+                    .catch(error => {
+                        console.error('Error loading modal:', error);
+                        alert('Error loading form. Please try again.');
+                    });
+            }
+
+            function submitModalForm(form) {
+                const formData = new FormData(form);
+                const submitButton = form.querySelector('button[type="button"]');
+                const originalText = submitButton.innerHTML;
+
+                // Disable submit button
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+                fetch(form.action, {
+                    method: form.method,
+                    body: formData,
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    if (html.includes('form') || html.includes('modal')) {
+                        // Form had errors, replace content
+                        document.getElementById('ajaxModalContent').innerHTML = html;
+
+                        // Re-enable button
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalText;
+                    } else {
+                        // Success - close modal and reload
+                        ajaxModal.hide();
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error submitting form:', error);
+                    alert('Error submitting form. Please try again.');
+
+                    // Re-enable button
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalText;
+                });
+
+                return false;
+            }
+
+            window.openModal = openModal;
+            window.submitModalForm = submitModalForm;
+        });
+    </script>
+
+}

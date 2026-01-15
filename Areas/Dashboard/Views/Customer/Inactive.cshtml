@@ -1,0 +1,235 @@
+﻿@model IEnumerable<E_Commerce.Areas.Dashboard.Models.Customer>
+
+@{
+    ViewData["Title"] = "Inactive / Deleted Customers";
+    Layout = "~/Areas/Dashboard/Views/Shared/_Layout.cshtml";
+}
+
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Inactive Customers</h1>
+
+        <!-- Header Actions -->
+        <div class="card mb-3 border-0 shadow-sm">
+            <div class="card-body py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title mb-0">Inactive Customer Management</h5>
+                        <p class="text-muted mb-0">Manage your inactive customer database</p>
+                    </div>
+                    <div>
+                        <a asp-action="Index" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Active Customers
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section - UPDATED TO MATCH EMPLOYEE STYLE -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" asp-action="Inactive">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Search by Company Name</label>
+                            <input type="text" name="searchName" class="form-control"
+                                   value="@ViewData["SearchName"]" placeholder="Company Name">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Search by Owner</label>
+                            <input type="text" name="searchOwner" class="form-control"
+                                   value="@ViewData["SearchOwner"]" placeholder="Owner Name">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                            <a asp-action="Inactive" class="btn btn-secondary">
+                                <i class="fas fa-redo"></i> Clear
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Inactive Customers Table -->
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-header bg-light border-0">
+                <i class="fas fa-archive me-1"></i>
+                Inactive Customers List
+                <span class="badge bg-warning ms-2">@Model.Count()</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="align-middle">Company</th>
+                                <th class="align-middle">Owner</th>
+                                <th class="align-middle">Email</th>
+                                <th class="align-middle">Phone</th>
+                                <th class="align-middle">City</th>
+                                <th class="align-middle">Status</th>
+                                <th class="align-middle text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var customer in Model)
+                            {
+                                <tr>
+                                    <td class="align-middle fw-semibold">@customer.Name</td>
+                                    <td class="align-middle">@customer.Owner</td>
+                                    <td class="align-middle">@customer.Email</td>
+                                    <td class="align-middle">@customer.ContactNumber</td>
+                                    <td class="align-middle">@customer.City</td>
+                                    <td class="align-middle">
+                                        <span class="badge bg-danger">Inactive</span>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-outline-warning btn-sm me-1"
+                                                    onclick="openModal('@Url.Action("EditPastCustomer", "Customer", new { area = "Dashboard", id = customer.CustomerID })', 'lg')"
+                                                    title="Edit Customer">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <form asp-action="Restore" asp-route-id="@customer.CustomerID" method="post" style="display:inline;">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-outline-success btn-sm"
+                                                        title="Restore Customer"
+                                                        onclick="return confirm('Are you sure you want to restore this customer?')">
+                                                    <i class="fas fa-undo"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            @if (!Model.Any())
+                            {
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-4">
+                                        <i class="fas fa-archive fa-2x mb-2 d-block"></i>
+                                        No inactive customers found
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- AJAX Modal -->
+<div class="modal fade" id="ajaxModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" id="ajaxModalContent"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openModal(url, size = '') {
+            console.log('Opening modal from URL:', url);
+            fetch(url)
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed to load modal');
+                    return res.text();
+                })
+                .then(html => {
+                    console.log('Modal HTML loaded successfully');
+                    document.getElementById('ajaxModalContent').innerHTML = html;
+                    const modal = new bootstrap.Modal(document.getElementById('ajaxModal'));
+
+                    if (size === 'lg') {
+                        document.querySelector('#ajaxModal .modal-dialog').classList.add('modal-lg');
+                    } else if (size === 'md') {
+                        document.querySelector('#ajaxModal .modal-dialog').classList.remove('modal-lg');
+                    }
+
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error loading modal:', error);
+                    alert('Error loading modal content');
+                });
+        }
+
+        function submitModalForm(form) {
+            console.log('Submitting form:', form.action);
+
+            const submitBtn = form.querySelector('button[type="button"]') ||
+                             form.closest('.modal-content').querySelector('.btn-success') ||
+                             document.querySelector('button[onclick*="submitModalForm"]');
+
+            let originalText = '';
+            if (submitBtn) {
+                originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            }
+
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: form.method,
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => {
+                const contentType = res.headers.get('content-type');
+                console.log('Response content-type:', contentType);
+
+                if (contentType && contentType.includes('application/json')) {
+                    return res.json();
+                }
+                return res.text().then(html => {
+                    console.log('Got HTML response, trying to parse as JSON might have failed');
+                    try {
+                        const jsonMatch = html.match(/\{.*\}/);
+                        if (jsonMatch) {
+                            return JSON.parse(jsonMatch[0]);
+                        }
+                    } catch (e) {
+                        console.log('Could not extract JSON from HTML response');
+                    }
+                    throw new Error('Server returned HTML instead of JSON');
+                });
+            })
+            .then(data => {
+                console.log('Server response:', data);
+                if (data.success) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('ajaxModal'));
+                    if (modal) modal.hide();
+                    location.reload();
+                } else {
+                    const errorMsg = data.error || 'An error occurred';
+                    const detailedErrors = data.errors ? data.errors.join('\n') : '';
+                    alert(`${errorMsg}${detailedErrors ? '\n\nErrors:\n' + detailedErrors : ''}`);
+
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }
+                }
+            })
+            .catch(err => {
+                console.error('Error submitting form:', err);
+                alert('An error occurred while submitting the form. Please check the console for details.');
+
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            });
+
+            return false;
+        }
+    </script>
+}

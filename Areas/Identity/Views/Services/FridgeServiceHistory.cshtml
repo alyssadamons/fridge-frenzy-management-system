@@ -1,0 +1,230 @@
+﻿@model List<E_Commerce.Areas.Dashboard.Models.Appointment>
+@{
+    ViewData["Title"] = "Fridge Service History";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var fridge = ViewBag.Fridge as E_Commerce.Models.FridgeRegistration;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("MyFridges")">My Fridges</a></li>
+                    <li class="breadcrumb-item active">Service History</li>
+                </ol>
+            </nav>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1><i class="fas fa-history text-primary"></i> Service History</h1>
+                    <p class="text-muted mb-0">for @fridge?.FridgeName</p>
+                    @if (!string.IsNullOrEmpty(fridge?.Brand))
+                    {
+                        <small class="text-muted">Brand: @fridge.Brand</small>
+                    }
+                </div>
+                <div>
+                    <a href="@Url.Action("MyFridges")" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left"></i> Back to Fridges
+                    </a>
+                    <a href="@Url.Action("BookAppointment", new { fridgeId = fridge?.Id })" class="btn btn-primary">
+                        <i class="fas fa-tools me-2"></i> Book Service
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fridge Details Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <strong>Model:</strong> @fridge?.FridgeName
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Brand:</strong> @(fridge?.Brand ?? "Not specified")
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Serial Number:</strong> @(fridge?.SerialNumber ?? "Not provided")
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Purchase Date:</strong>
+                            @if (fridge?.PurchaseDate != null)
+                            {
+                                @fridge.PurchaseDate.ToString("dd MMM yyyy")
+                            }
+                            else
+                            {
+                                <span class="text-muted">Not specified</span>
+                            }
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-tools fa-4x text-muted"></i>
+                </div>
+                <h4 class="text-muted">No service history</h4>
+                <p class="text-muted mb-4">This fridge hasn't had any service appointments yet.</p>
+                <a href="@Url.Action("BookAppointment", new { fridgeId = fridge?.Id })" class="btn btn-primary">
+                    <i class="fas fa-tools me-2"></i> Book First Service
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Service Appointments (@Model.Count total)
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Technician</th>
+                                <th>Issue Type</th>
+                                <th>Status</th>
+                                <th>Technician Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var appointment in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@appointment.StartTime.ToString("ddd, MMM dd, yyyy")</strong><br>
+                                        <small class="text-muted">@appointment.StartTime.ToString("h:mm tt") - @appointment.EndTime.ToString("h:mm tt")</small>
+                                    </td>
+                                    <td>
+                                        @if (appointment.Employee != null)
+                                        {
+                                            @($"{appointment.Employee.FirstName} {appointment.Employee.LastName}")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Not assigned</span>
+                                        }
+                                    </td>
+                                    <td>@appointment.IssueType</td>
+                                    <td>
+                                        @{
+                                            string badgeClass = appointment.Status switch
+                                            {
+                                                "Completed" => "bg-success",
+                                                "Pending" => "bg-warning",
+                                                "Incomplete" => "bg-danger",
+                                                "Rescheduled" => "bg-info",
+                                                "Cancelled" => "bg-secondary",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+                                        <span class="badge @badgeClass">@appointment.Status</span>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(appointment.TechnicianFaults))
+                                        {
+                                            <small class="text-muted">@appointment.TechnicianFaults</small>
+                                        }
+                                        else if (!string.IsNullOrEmpty(appointment.Notes))
+                                        {
+                                            <small class="text-muted">@appointment.Notes</small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (appointment.Status == "Incomplete")
+                                        {
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="@Url.Action("EditAppointment", new { id = appointment.Id })"
+                                                   class="btn btn-outline-primary" title="Edit Appointment">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="@Url.Action("RescheduleAppointment", new { id = appointment.Id })"
+                                                   class="btn btn-outline-info ms-1" title="Reschedule">
+                                                    <i class="fas fa-calendar-alt"></i>
+                                                </a>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No actions</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Statistics -->
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h4>@Model.Count(a => a.Status == "Completed")</h4>
+                        <p class="mb-0">Completed</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body text-center">
+                        <h4>@Model.Count(a => a.Status == "Pending")</h4>
+                        <p class="mb-0">Pending</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <h4>@Model.Count(a => a.Status == "Rescheduled")</h4>
+                        <p class="mb-0">Rescheduled</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-secondary text-white">
+                    <div class="card-body text-center">
+                        <h4>@Model.Count(a => a.Status == "Cancelled")</h4>
+                        <p class="mb-0">Cancelled</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+        });
+    </script>
+}

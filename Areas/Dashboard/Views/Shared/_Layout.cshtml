@@ -1,0 +1,746 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title class="fas fa-snowflake me-2">Fridge Frenzy - Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❄️</text></svg>">
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+    <link href="~/Dashboard/css/styles.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Load Bootstrap JS only once -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body class="sb-nav-fixed">
+    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <!-- Navbar Brand-->
+        <a class="navbar-brand ps-3" asp-area="Dashboard" asp-controller="Home" asp-action="Index">
+            <span class="snowflake-logo">Fridge Frenzy</span>
+        </a>
+        <!-- Navbar-->
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-home me-1"></i>Back to Site
+                </a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user fa-fw"></i>
+                    @User.Identity?.Name
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    <li>
+                        <form id="logoutForm" asp-area="Identity" asp-page="/Account/Logout" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+    <div id="layoutSidenav">
+        <div id="layoutSidenav_nav">
+            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+                <div class="sb-sidenav-menu">
+                    <div class="nav">
+                        <div class="sb-sidenav-menu-heading">Core</div>
+                        <a class="nav-link" asp-area="Dashboard" asp-controller="Home" asp-action="Index">
+                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                            Dashboard
+                        </a>
+
+                        <!-- ADMIN MENU -->
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <div class="sb-sidenav-menu-heading">Management</div>
+                            <a class="nav-link" asp-area="Dashboard" asp-controller="Customer" asp-action="Index">
+                                <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                                Customers
+                            </a>
+                            <a class="nav-link" asp-area="Dashboard" asp-controller="Employee" asp-action="Index">
+                                <div class="sb-nav-link-icon"><i class="fas fa-id-badge"></i></div>
+                                Employees
+                            </a>
+
+                            <div class="sb-sidenav-menu-heading">E-Commerce</div>
+                            <a class="nav-link" asp-area="Dashboard" asp-controller="Categories" asp-action="Index">
+                                <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
+                                Categories
+                            </a>
+                            <a class="nav-link" asp-area="Dashboard" asp-controller="Products" asp-action="Index">
+                                <div class="sb-nav-link-icon"><i class="fas fa-boxes"></i></div>
+                                Products
+                            </a>
+                            <a class="nav-link" asp-area="Dashboard" asp-controller="Orders" asp-action="Index">
+                                <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
+                                Orders
+                            </a>
+
+                            <a class="nav-link" asp-area="Dashboard" asp-controller="Appointments" asp-action="Index">
+                                <div class="sb-nav-link-icon"><i class="fas fa-tools"></i></div>
+                                Maintenance
+                            </a>
+
+                            <a class="nav-link" asp-area="Dashboard" asp-controller="Logs" asp-action="Index">
+                                <div class="sb-nav-link-icon"><i class="fas fa-clipboard-list"></i></div>
+                                System Logs
+                            </a>
+                        }
+
+                        <!-- SALES MENU -->
+                        @if (User.IsInRole("Sales"))
+                        {
+                            <div class="sb-sidenav-menu-heading">Sales</div>
+                            <a class="nav-link" asp-area="Dashboard" asp-controller="Products" asp-action="Index">
+                                <div class="sb-nav-link-icon"><i class="fas fa-boxes"></i></div>
+                                Products
+                            </a>
+                            <a class="nav-link" asp-area="Dashboard" asp-controller="Categories" asp-action="Index">
+                                <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
+                                Categories
+                            </a>
+                            <a class="nav-link" asp-area="Dashboard" asp-controller="Orders" asp-action="Index">
+                                <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
+                                Orders
+                            </a>
+                        }
+
+                        <!-- CUSTOMER MANAGER MENU -->
+                        @if (User.IsInRole("CustomerManager"))
+                        {
+                            <div class="sb-sidenav-menu-heading">Customer Management</div>
+                            <a class="nav-link" asp-area="Dashboard" asp-controller="Customer" asp-action="Index">
+                                <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                                Customers
+                            </a>
+                            <a class="nav-link" asp-area="Dashboard" asp-controller="Orders" asp-action="Index">
+                                <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
+                                Orders
+                            </a>
+                        }
+
+                        <!-- TECHNICIAN MENU -->
+                        @if (User.IsInRole("Technician"))
+                        {
+                            <div class="sb-sidenav-menu-heading">Maintenance</div>
+                            <a class="nav-link" asp-area="Dashboard" asp-controller="Appointments" asp-action="Index">
+                                <div class="sb-nav-link-icon"><i class="fas fa-tools"></i></div>
+                                Appointments
+                            </a>
+                            <a class="nav-link" asp-area="Dashboard" asp-controller="Customer" asp-action="Index">
+                                <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                                Customers
+                            </a>
+                        }
+
+                        <!-- EMPLOYEE MENU (Fallback for other roles) -->
+                        @if (User.Identity.IsAuthenticated && !User.IsInRole("Admin") && !User.IsInRole("Sales") && !User.IsInRole("CustomerManager") && !User.IsInRole("Technician"))
+                        {
+                            <div class="sb-sidenav-menu-heading">Employee</div>
+                            <a class="nav-link" asp-area="Dashboard" asp-controller="Home" asp-action="Index">
+                                <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                                Dashboard
+                            </a>
+                            <div class="nav-link text-muted small">
+                                <i>Limited access - Contact administrator</i>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="sb-sidenav-footer">
+                    <div class="small">Logged in as:</div>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <span class="text-success">Administrator</span>
+                    }
+                    else if (User.IsInRole("Sales"))
+                    {
+                        <span class="text-info">Sales Representative</span>
+                    }
+                    else if (User.IsInRole("CustomerManager"))
+                    {
+                        <span class="text-warning">Customer Manager</span>
+                    }
+                    else if (User.IsInRole("Technician"))
+                    {
+                        <span class="text-primary">Technician</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Employee</span>
+                    }
+                </div>
+            </nav>
+        </div>
+
+        <!-- Reusable AJAX Modal -->
+        <div class="modal fade" id="ajaxModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content" id="ajaxModalContent"></div>
+            </div>
+        </div>
+
+        <div id="layoutSidenav_content">
+            <main>
+                <!-- Display any TempData messages as permanent alerts -->
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-permanent alert-dismissible fade show mx-4 mt-3">
+                        <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-permanent alert-dismissible fade show mx-4 mt-3">
+                        <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                @if (TempData["Warning"] != null)
+                {
+                    <div class="alert alert-warning alert-permanent alert-dismissible fade show mx-4 mt-3">
+                        <i class="fas fa-exclamation-triangle me-2"></i>@TempData["Warning"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                @if (TempData["Info"] != null)
+                {
+                    <div class="alert alert-info alert-permanent alert-dismissible fade show mx-4 mt-3">
+                        <i class="fas fa-info-circle me-2"></i>@TempData["Info"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+            <footer class="py-4 bg-light mt-auto">
+                <div class="container-fluid px-4">
+                    <div class="d-flex align-items-center justify-content-between small">
+                        <div class="text-muted">Copyright &copy; Fridge Frenzy @DateTime.Now.Year</div>
+                        <div class="text-muted">
+                            <i class="fas fa-user-shield me-1"></i>
+                            @User.Identity?.Name
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="~/Dashboard/js/scripts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+    <script src="~/Dashboard/js/datatables-simple-demo.js"></script>
+
+    <!-- Global JavaScript Functions for Modals -->
+    <script>
+        // Global modal instance
+        let ajaxModal = null;
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded - initializing components');
+
+            // Initialize modal
+            const ajaxModalEl = document.getElementById('ajaxModal');
+            if (ajaxModalEl) {
+                ajaxModal = new bootstrap.Modal(ajaxModalEl);
+            }
+
+            // Initialize dropdowns manually if needed
+            const dropdowns = document.querySelectorAll('.dropdown-toggle');
+            dropdowns.forEach(function(dropdown) {
+                dropdown.addEventListener('click', function(e) {
+                    console.log('Dropdown clicked');
+                });
+            });
+
+            // Auto-dismiss ONLY temporary alerts (exclude permanent ones)
+            const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+            alerts.forEach(function(alert) {
+                setTimeout(function() {
+                    if (alert && alert.parentNode) {
+                        const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                        bsAlert.close();
+                    }
+                }, 5000);
+            });
+
+            // Fix for aria-hidden warning
+            if (ajaxModalEl) {
+                ajaxModalEl.addEventListener('show.bs.modal', function() {
+                    this.removeAttribute('aria-hidden');
+                });
+
+                ajaxModalEl.addEventListener('hide.bs.modal', function() {
+                    this.setAttribute('aria-hidden', 'true');
+                });
+            }
+
+            // Enhanced logout form handling
+            const logoutForm = document.getElementById('logoutForm');
+            if (logoutForm) {
+                logoutForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    // Show loading state
+                    const logoutBtn = this.querySelector('button[type="submit"]');
+                    const originalText = logoutBtn.innerHTML;
+                    logoutBtn.disabled = true;
+                    logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Logging out...';
+
+                    // Submit the form via AJAX
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: new FormData(this),
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        }
+                    })
+                    .then(response => {
+                        if (response.redirected) {
+                            // If server redirects, follow it
+                            window.location.href = response.url;
+                        } else if (response.ok) {
+                            // If successful but no redirect, go to home page
+                            window.location.href = '/';
+                        } else {
+                            // If error, still redirect to home
+                            window.location.href = '/';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Logout error:', error);
+                        // Even on error, redirect to home
+                        window.location.href = '/';
+                    });
+                });
+            }
+
+            // Test dropdown functionality
+            console.log('Dropdown elements found:', document.querySelectorAll('.dropdown-toggle').length);
+        });
+
+        // Global functions that modals can access
+        function togglePasswordVisibility(fieldId, button) {
+            console.log('Toggling password for:', fieldId, 'Button:', button);
+
+            const input = document.getElementById(fieldId);
+            if (!input) {
+                console.error('Input field not found:', fieldId);
+                return;
+            }
+
+            // Try multiple ways to find the icon
+            let icon = button.querySelector('i');
+            if (!icon) {
+                // Try to find any child element with font-awesome classes
+                icon = button.querySelector('.fas, .fa, .far, .fal');
+            }
+            if (!icon) {
+                // If no icon found, check if button itself has the classes
+                if (button.classList.contains('fas') || button.classList.contains('fa')) {
+                    icon = button;
+                } else {
+                    console.warn('No icon found in button, toggling input anyway');
+                    // Still toggle the input even if no icon found
+                    input.type = input.type === 'password' ? 'text' : 'password';
+                    return;
+                }
+            }
+
+            console.log('Current input type:', input.type);
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+                console.log('Changed to text, icon: fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+                console.log('Changed to password, icon: fa-eye');
+            }
+        }
+
+        function submitCustomerForm() {
+            console.log('Submit button clicked');
+
+            const newPasswordField = document.getElementById('newPasswordEdit');
+            const confirmPasswordField = document.getElementById('confirmPasswordEdit');
+
+            const newPass = newPasswordField ? newPasswordField.value : '';
+            const confirmPass = confirmPasswordField ? confirmPasswordField.value : '';
+
+            // Validate password only if user entered something
+            if (newPass.length > 0 || confirmPass.length > 0) {
+                if (newPass.length < 6) {
+                    alert('Password must be at least 6 characters long');
+                    return false;
+                }
+
+                if (newPass !== confirmPass) {
+                    alert('Passwords do not match');
+                    return false;
+                }
+                console.log('Password will be updated');
+            } else {
+                console.log('No password change requested');
+            }
+
+            const form = document.getElementById('editCustomerForm');
+            if (!form) {
+                console.error('Form not found');
+                return false;
+            }
+
+            if (!form.checkValidity()) {
+                // Trigger browser validation UI
+                form.reportValidity();
+                return false;
+            }
+
+            const btn = document.getElementById('updateCustomerBtn');
+            if (!btn) {
+                console.error('Update button not found');
+                return false;
+            }
+
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+
+            const formData = new FormData(form);
+
+            console.log('Form data being sent:');
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Full response data:', data);
+
+                if (data.success) {
+                    let message = data.message || 'Customer updated successfully!';
+
+                    if (data.tempPassword) {
+                        message += '\n\n🔑 NEW PASSWORD: ' + data.tempPassword + '\n\n⚠️ Please save this password securely!';
+                    }
+
+                    alert(message);
+
+                    // Close modal and reload after delay
+                    setTimeout(() => {
+                        if (ajaxModal) {
+                            ajaxModal.hide();
+                        }
+
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    }, 2000);
+                } else {
+                    // DISPLAY THE ACTUAL VALIDATION ERRORS
+                    let errorMsg = 'Please fix the following errors:\n\n';
+
+                    if (data.errors && data.errors.length > 0) {
+                        errorMsg += '• ' + data.errors.join('\n• ');
+                    } else if (data.error) {
+                        errorMsg += data.error;
+                    } else {
+                        errorMsg += 'Unknown validation error';
+                    }
+
+                    alert(errorMsg);
+                    console.log('Validation errors:', data.errors);
+
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                alert('A network error occurred. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+        }
+
+        function openModal(url, size = 'lg') {
+            console.log('Opening modal:', url, 'Size:', size);
+
+            // Ensure modal is initialized
+            if (!ajaxModal) {
+                const ajaxModalEl = document.getElementById('ajaxModal');
+                if (ajaxModalEl) {
+                    ajaxModal = new bootstrap.Modal(ajaxModalEl);
+                } else {
+                    console.error('Modal element not found');
+                    return;
+                }
+            }
+
+            // Set modal size class
+            const modalDialog = document.querySelector('#ajaxModal .modal-dialog');
+            if (modalDialog) {
+                modalDialog.className = 'modal-dialog modal-dialog-centered';
+
+                if (size === 'sm') {
+                    modalDialog.classList.add('modal-sm');
+                } else if (size === 'xl') {
+                    modalDialog.classList.add('modal-xl');
+                } else {
+                    modalDialog.classList.add('modal-lg');
+                }
+            }
+
+            // Show loading state
+            document.getElementById('ajaxModalContent').innerHTML = `
+                <div class="modal-body text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Loading...</p>
+                </div>
+            `;
+
+            fetch(url)
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`Network response was not ok: ${res.status} ${res.statusText}`);
+                    }
+                    return res.text();
+                })
+                .then(html => {
+                    document.getElementById('ajaxModalContent').innerHTML = html;
+                    if (ajaxModal) {
+                        ajaxModal.show();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading modal:', error);
+                    document.getElementById('ajaxModalContent').innerHTML = `
+                        <div class="modal-header">
+                            <h5 class="modal-title">Error</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-danger alert-permanent">
+                                <h6>Error loading content</h6>
+                                <p class="mb-0">${error.message}</p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" onclick="openModal('${url}', '${size}')">Try Again</button>
+                        </div>
+                    `;
+                    if (ajaxModal) {
+                        ajaxModal.show();
+                    }
+                });
+        }
+
+        function submitModalForm(form) {
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: form.method,
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => {
+                const contentType = res.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return res.json().then(data => {
+                        if (data.success) {
+                            if (ajaxModal) {
+                                ajaxModal.hide();
+                            }
+                            location.reload();
+                        } else {
+                            // Handle validation errors
+                            document.getElementById('ajaxModalContent').innerHTML = data.html;
+                        }
+                    });
+                } else {
+                    return res.text().then(html => {
+                        if (html.includes('form')) {
+                            document.getElementById('ajaxModalContent').innerHTML = html;
+                        } else {
+                            if (ajaxModal) {
+                                ajaxModal.hide();
+                            }
+                            location.reload();
+                        }
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting form:', error);
+                alert('Error submitting form. Please try again.');
+            });
+
+            return false;
+        }
+
+        // Helper function to show alerts in modals
+        function showAlert(message, type) {
+            // Try to find alert container in modal first
+            let alertContainer = document.querySelector('#ajaxModal .alert-container');
+            if (!alertContainer) {
+                alertContainer = document.querySelector('#alertContainer');
+            }
+
+            if (!alertContainer) {
+                // Fallback to alert
+                alert(message);
+                return;
+            }
+
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-permanent alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alertDiv);
+        }
+
+        // Enhanced error handling for modal links
+        $(document).on('click', '[data-toggle="modal"]', function(e) {
+            e.preventDefault();
+            const url = $(this).data('url') || $(this).attr('href');
+            const size = $(this).data('size') || 'lg';
+            openModal(url, size);
+        });
+
+        // Global AJAX error handler to redirect to AccessDenied on 401/403
+        $(document).ajaxError(function(event, xhr, settings, error) {
+            if (xhr.status === 401 || xhr.status === 403) {
+                console.log('Unauthorized access detected, redirecting to AccessDenied');
+                window.location.href = '/Home/AccessDenied';
+            }
+        });
+
+        // Handle page navigation errors
+        window.addEventListener('error', function(e) {
+            console.log('Global error detected:', e);
+            // Check if it's an authentication-related error
+            if (e.message && (e.message.includes('401') || e.message.includes('403') || e.message.includes('unauthorized'))) {
+                window.location.href = '/Home/AccessDenied';
+            }
+        });
+
+                <!-- ====================== -->
+        <!-- AUTO LOGOUT FUNCTIONALITY -->
+        <!-- ====================== -->
+        (function() {
+            'use strict';
+
+            const TIMEOUT_MINUTES = 5; // Must match server-side timeout
+            const WARNING_MINUTES = 4; // Show warning 1 minute before timeout
+            const CHECK_INTERVAL = 30000; // Check every 30 seconds
+
+            let lastActivity = Date.now();
+            let timeoutWarningShown = false;
+
+            // Track user activity
+            function resetActivityTimer() {
+                lastActivity = Date.now();
+                timeoutWarningShown = false;
+            }
+
+            // Activity events to monitor
+            const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+
+            activityEvents.forEach(event => {
+                document.addEventListener(event, resetActivityTimer, true);
+            });
+
+            // Check for inactivity
+            function checkInactivity() {
+                const now = Date.now();
+                const inactiveTime = (now - lastActivity) / 1000 / 60; // in minutes
+
+                // Show warning at 4 minutes
+                if (inactiveTime >= WARNING_MINUTES && !timeoutWarningShown) {
+                    timeoutWarningShown = true;
+                    const remainingSeconds = Math.round((TIMEOUT_MINUTES - inactiveTime) * 60);
+
+                    if (confirm(`You will be logged out in ${remainingSeconds} seconds due to inactivity.\n\nClick OK to stay logged in.`)) {
+                        resetActivityTimer();
+
+                        // Ping server to keep session alive
+                        fetch('/Dashboard/Home/Index', {
+                            method: 'HEAD',
+                            credentials: 'include'
+                        }).catch(err => console.log('Keep-alive ping failed:', err));
+                    }
+                }
+
+                // Force logout at 5 minutes - FIXED: Use proper Identity logout with area
+                if (inactiveTime >= TIMEOUT_MINUTES) {
+                    alert('Your session has expired due to inactivity. You will be logged out.');
+
+                    // Create a form and submit it to properly logout
+                    const logoutForm = document.createElement('form');
+                    logoutForm.method = 'POST';
+                    logoutForm.action = '/Identity/Account/Logout'; // This should work with your Identity setup
+
+                    // Add anti-forgery token
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+                    logoutForm.appendChild(tokenInput);
+                    document.body.appendChild(logoutForm);
+                    logoutForm.submit();
+                }
+            }
+
+            // Start monitoring
+            setInterval(checkInactivity, CHECK_INTERVAL);
+
+            console.log(`Dashboard session timeout monitor initialized (${TIMEOUT_MINUTES} min timeout)`);
+        })();
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

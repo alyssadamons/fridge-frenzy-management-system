@@ -1,0 +1,130 @@
+﻿@model E_Commerce.Areas.Dashboard.Models.Appointment
+@{
+    var appointment = ViewBag.Appointment as E_Commerce.Areas.Dashboard.Models.Appointment;
+}
+
+<div class="modal-header bg-success text-white">
+    <h5 class="modal-title"><i class="fas fa-user-cog"></i> Assign Technician</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <form id="assignTechnicianForm" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@appointment.Id" />
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Customer</label>
+                <input type="text" class="form-control" value="@appointment.Customer?.Name" readonly>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Current Status</label>
+                <input type="text" class="form-control" value="@appointment.Status" readonly>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Issue Type</label>
+            <input type="text" class="form-control" value="@appointment.IssueType" readonly>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Select Technician *</label>
+            <select name="technicianId" class="form-select" required>
+                <option value="">-- Select Technician --</option>
+                @foreach (var tech in ViewBag.Technicians)
+                {
+                    <option value="@tech.EmployeeID">@tech.FullName - @tech.JobTitle</option>
+                }
+            </select>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Scheduled Date *</label>
+                <input type="date" name="scheduledDate" class="form-control"
+                       value="@appointment.StartTime.ToString("yyyy-MM-dd")"
+                       min="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Scheduled Time *</label>
+                <select name="scheduledTime" class="form-select" required>
+                    <option value="">-- Select Time --</option>
+                    @for (int hour = 8; hour <= 16; hour++)
+                    {
+                        <option value="@hour:00" selected="@(appointment.StartTime.Hour == hour && appointment.StartTime.Minute == 0)">@hour:00</option>
+                        <option value="@hour:30" selected="@(appointment.StartTime.Hour == hour && appointment.StartTime.Minute == 30)">@hour:30</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>Workflow:</strong><br>
+            • <strong>Incomplete</strong> = Customer booked, needs technician<br>
+            • <strong>Pending</strong> = Technician assigned, ready for work<br>
+            • <strong>Completed</strong> = Work finished
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="button" class="btn btn-success" onclick="assignTechnician()">
+        <i class="fas fa-user-check"></i> Assign Technician
+    </button>
+</div>
+
+<script>
+    function assignTechnician() {
+        const form = document.getElementById('assignTechnicianForm');
+        const formData = new FormData(form);
+
+        // Combine date and time
+        const date = formData.get('scheduledDate');
+        const time = formData.get('scheduledTime');
+        if (date && time) {
+            const [hours, minutes] = time.split(':');
+            const scheduledDateTime = new Date(date + 'T' + hours.padStart(2, '0') + ':' + minutes.padStart(2, '0'));
+            formData.set('scheduledTime', scheduledDateTime.toISOString());
+        }
+
+        // Show loading state
+        const button = event.target;
+        const originalText = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Assigning...';
+
+        fetch('@Url.Action("AssignTechnician", "Appointments")', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(result => {
+            if (result === 'OK') {
+                // Close modal and refresh page
+                const modal = bootstrap.Modal.getInstance(document.getElementById('ajaxModal'));
+                modal.hide();
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
+            } else {
+                throw new Error(result);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error assigning technician: ' + error.message);
+            // Reset button
+            button.disabled = false;
+            button.innerHTML = originalText;
+        });
+    }
+</script>

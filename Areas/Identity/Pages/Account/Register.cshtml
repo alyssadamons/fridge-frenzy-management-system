@@ -1,0 +1,385 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .register-card {
+        max-width: 1100px;
+        margin: 2rem auto;
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.1);
+    }
+    .register-header {
+        background: linear-gradient(90deg, #28a745, #2ecc71);
+        border-radius: 1rem 1rem 0 0;
+        color: #fff;
+        text-align: center;
+        padding: 2rem 1rem;
+    }
+    .register-header h3 { font-weight: 700; }
+
+    .form-section {
+        background: #fafafa;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .form-section h5 {
+        font-weight: 600;
+        border-bottom: 2px solid #28a74533;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #157347;
+    }
+
+    .form-label { font-weight: 600; }
+
+    input.form-control, textarea.form-control {
+        border-radius: 0.5rem;
+        border: 1px solid #ccc;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+    input.form-control:focus, textarea.form-control:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40,167,69,0.15);
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: transparent;
+        color: #888;
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+    .password-toggle:hover { color: #28a745; }
+
+    .alert { border-radius: 0.75rem; }
+
+    .text-muted a {
+        color: #28a745;
+        text-decoration: none;
+    }
+    .text-muted a:hover { text-decoration: underline; }
+
+    .register-body {
+        background: #fff;
+        border-radius: 0 0 1rem 1rem;
+        padding: 3rem;
+    }
+
+    @@media (max-width: 768px) {
+        .register-body { padding: 2rem; }
+        .form-section { padding: 1rem; }
+    }
+</style>
+
+<div class="card register-card">
+    <div class="register-header">
+        <h3><i class="fas fa-user-plus me-2"></i>Join Fridge Frenzy</h3>
+        <p class="mb-0 mt-2 opacity-75">Create your account to start shopping</p>
+    </div>
+
+    <div class="register-body">
+        <form asp-route-returnUrl="@Model.ReturnUrl" method="post" id="registerForm">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <!-- Account Information -->
+            <div class="form-section">
+                <h5><i class="fas fa-user-circle"></i> Account Information</h5>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label asp-for="Input.Email" class="form-label">Email Address *</label>
+                        <input asp-for="Input.Email" class="form-control" placeholder="your.email@example.com" />
+                        <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Input.ConfirmEmail" class="form-label">Confirm Email *</label>
+                        <input asp-for="Input.ConfirmEmail" class="form-control" placeholder="Re-enter your email" />
+                        <span asp-validation-for="Input.ConfirmEmail" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Input.Password" class="form-label">Password *</label>
+                        <div class="position-relative">
+                            <input asp-for="Input.Password" class="form-control pe-5" id="password" type="password" placeholder="Create a strong password" />
+                            <button type="button" id="togglePassword" class="password-toggle">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Input.ConfirmPassword" class="form-label">Confirm Password *</label>
+                        <div class="position-relative">
+                            <input asp-for="Input.ConfirmPassword" class="form-control pe-5" id="confirmPassword" type="password" placeholder="Re-enter your password" />
+                            <button type="button" id="toggleConfirmPassword" class="password-toggle">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                        <div id="passwordMatch" class="form-text"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Information -->
+            <div class="form-section">
+                <h5><i class="fas fa-building"></i> Business Information</h5>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label asp-for="Input.Name" class="form-label">Company Name *</label>
+                        <input asp-for="Input.Name" class="form-control" placeholder="Your company name" />
+                        <span asp-validation-for="Input.Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Input.Owner" class="form-label">Owner/Contact Name</label>
+                        <input asp-for="Input.Owner" class="form-control" placeholder="Full name" />
+                        <span asp-validation-for="Input.Owner" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Input.ContactNumber" class="form-label">Contact Number *</label>
+                        <input asp-for="Input.ContactNumber" class="form-control" placeholder="0812345678" />
+                        <span asp-validation-for="Input.ContactNumber" class="text-danger small"></span>
+                        <div class="form-text">10-digit number starting with 0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Information -->
+            <div class="form-section">
+                <h5><i class="fas fa-map-marker-alt"></i> Address Information</h5>
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <label asp-for="Input.StreetNumber" class="form-label">Street Number</label>
+                        <input asp-for="Input.StreetNumber" class="form-control" placeholder="123" />
+                        <span asp-validation-for="Input.StreetNumber" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-5">
+                        <label asp-for="Input.StreetName" class="form-label">Street Name</label>
+                        <input asp-for="Input.StreetName" class="form-control" placeholder="Main Street" />
+                        <span asp-validation-for="Input.StreetName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Input.Suburb" class="form-label">Suburb</label>
+                        <input asp-for="Input.Suburb" class="form-control" placeholder="Suburb" />
+                        <span asp-validation-for="Input.Suburb" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row g-4 mt-1">
+                    <div class="col-md-6">
+                        <label asp-for="Input.City" class="form-label">City</label>
+                        <input asp-for="Input.City" class="form-control" placeholder="City" />
+                        <span asp-validation-for="Input.City" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="Input.PostalCode" class="form-label">Postal Code</label>
+                        <input asp-for="Input.PostalCode" class="form-control" placeholder="6001" />
+                        <span asp-validation-for="Input.PostalCode" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <label asp-for="Input.Notes" class="form-label">Additional Notes</label>
+                    <textarea asp-for="Input.Notes" class="form-control" rows="2" placeholder="Any additional information..."></textarea>
+                    <span asp-validation-for="Input.Notes" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <!-- Terms -->
+            <div class="form-check d-flex align-items-center mb-4" style="gap: 0.5rem;">
+                <input asp-for="Input.AgreeToTerms" class="form-check-input m-0" style="margin-top: 0 !important;" />
+                <label asp-for="Input.AgreeToTerms" class="form-check-label mb-0" style="margin-top: 0 !important;">
+                    I agree to the <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-success fw-semibold">Privacy Policy</a>
+                </label>
+            </div>
+            <span asp-validation-for="Input.AgreeToTerms" class="text-danger small d-block"></span>
+
+
+            <button type="submit" class="btn btn-success w-100 fw-semibold">
+                <i class="fas fa-user-plus me-2"></i>Create Account
+            </button>
+        </form>
+
+        <div class="mt-4 text-center text-muted">
+            <p class="mb-0">
+                Already have an account?
+                <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Model.ReturnUrl" class="fw-semibold">
+                    <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById("registerForm");
+            const passwordInput = document.getElementById("password");
+            const confirmPasswordInput = document.getElementById("confirmPassword");
+            const passwordMatch = document.getElementById("passwordMatch");
+
+            const togglePassword = document.getElementById("togglePassword");
+            const toggleConfirmPassword = document.getElementById("toggleConfirmPassword");
+
+            // toggle visibility
+            function togglePasswordVisibility(toggleBtn, inputField) {
+                toggleBtn?.addEventListener("click", () => {
+                    const type = inputField.type === "password" ? "text" : "password";
+                    inputField.type = type;
+                    toggleBtn.querySelector('i').className = type === "password" ? "fas fa-eye" : "fas fa-eye-slash";
+                });
+            }
+            togglePasswordVisibility(togglePassword, passwordInput);
+            togglePasswordVisibility(toggleConfirmPassword, confirmPasswordInput);
+
+            // password match indicator
+            function checkPasswordMatch() {
+                const p = passwordInput.value, c = confirmPasswordInput.value;
+                if (!c) { 
+                    passwordMatch.textContent = ''; 
+                    passwordMatch.className = 'form-text'; 
+                    return; 
+                }
+                if (p === c) { 
+                    passwordMatch.textContent = '✓ Passwords match'; 
+                    passwordMatch.className = 'form-text text-success'; 
+                }
+                else { 
+                    passwordMatch.textContent = '✗ Passwords do not match'; 
+                    passwordMatch.className = 'form-text text-danger'; 
+                }
+            }
+            passwordInput.addEventListener('input', checkPasswordMatch);
+            confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+
+            // client-side validation on submit
+            form.addEventListener("submit", function (e) {
+                const email = document.querySelector('[name="Input.Email"]').value.trim();
+                const confirmEmail = document.querySelector('[name="Input.ConfirmEmail"]').value.trim();
+                const password = passwordInput.value.trim();
+                const confirmPassword = confirmPasswordInput.value.trim();
+
+                const emailRegex = /^[^\s]+[^\s]+\.[^\s]+$/;
+                const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$!%*?&]).{8,}$/;
+
+                if (!emailRegex.test(email)) { 
+                    alert("Please enter a valid email address."); 
+                    e.preventDefault(); 
+                    return; 
+                }
+                if (email !== confirmEmail) { 
+                    alert("Emails do not match."); 
+                    e.preventDefault(); 
+                    return; 
+                }
+                if (!strongRegex.test(password)) {
+                    alert("Password must be 8+ characters with at least one uppercase letter, one lowercase letter, one number, and one special character.");
+                    e.preventDefault(); 
+                    return;
+                }
+                if (password !== confirmPassword) { 
+                    alert("Passwords do not match."); 
+                    e.preventDefault(); 
+                }
+                    const ownerName = document.querySelector('[name="Input.Owner"]')?.value.trim();
+            const streetName = document.querySelector('[name="Input.StreetName"]')?.value.trim();
+            const city = document.querySelector('[name="Input.City"]')?.value.trim();
+            const postalCode = document.querySelector('[name="Input.PostalCode"]')?.value.trim();
+            const contactNumber = document.querySelector('[name="Input.ContactNumber"]')?.value.trim();
+
+            if (ownerName && !validateOwnerName(ownerName)) {
+                alert("Owner name can only contain letters, spaces, and hyphens.");
+                e.preventDefault();
+                return;
+            }
+
+            if (streetName && !validateStreetName(streetName)) {
+                alert("Street name can only contain letters, spaces, hyphens, periods, and apostrophes.");
+                e.preventDefault();
+                return;
+            }
+
+            if (city && !validateCity(city)) {
+                alert("City can only contain letters, spaces, and hyphens.");
+                e.preventDefault();
+                return;
+            }
+
+            if (postalCode && !validatePostalCode(postalCode)) {
+                alert("Postal code must be exactly 4 digits.");
+                e.preventDefault();
+                return;
+            }
+
+            if (contactNumber && !validateContactNumber(contactNumber)) {
+                alert("Contact number must be exactly 10 digits starting with 0.");
+                e.preventDefault();
+                return;
+            }
+        });
+                    // Add these validation functions to your existing script
+        function validateOwnerName(input) {
+            const regex = /^[a-zA-Z\s\-]+$/;
+            return regex.test(input);
+        }
+
+        function validateStreetName(input) {
+            const regex = /^[a-zA-Z\s\-\.']+$/;
+            return regex.test(input);
+        }
+
+        function validateCity(input) {
+            const regex = /^[a-zA-Z\s\-]+$/;
+            return regex.test(input);
+        }
+
+        function validatePostalCode(input) {
+            const regex = /^\d{4}$/;
+            return regex.test(input);
+        }
+
+        function validateContactNumber(input) {
+            const regex = /^0\d{9}$/;
+            return regex.test(input);
+        }
+
+            // fade out success alert
+            const successAlert = document.querySelector('.alert-success');
+            if (successAlert) {
+                setTimeout(() => {
+                    if (successAlert.parentNode) {
+                        successAlert.remove();
+                    }
+                }, 5000);
+            }
+        });
+    </script>
+}

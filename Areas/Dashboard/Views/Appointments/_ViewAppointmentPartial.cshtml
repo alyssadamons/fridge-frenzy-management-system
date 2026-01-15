@@ -1,0 +1,223 @@
+﻿@model E_Commerce.Areas.Dashboard.Models.Appointment
+
+<div class="modal-header bg-info text-white">
+    <h5 class="modal-title">Appointment Details</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <dl class="row">
+        <!-- Customer Information -->
+        <dt class="col-sm-4">Customer</dt>
+        <dd class="col-sm-8">@Model.Customer?.Name</dd>
+
+        <dt class="col-sm-4">Customer Contact</dt>
+        <dd class="col-sm-8">
+            Email: @Model.Customer?.Email<br />
+            Phone: @Model.Customer?.ContactNumber<br />
+            Address: @($"{Model.Customer?.StreetNumber} {Model.Customer?.StreetName}, {Model.Customer?.Suburb}, {Model.Customer?.City}, {Model.Customer?.PostalCode}")
+        </dd>
+
+        <!-- Fridge Information -->
+        <dt class="col-sm-4">Service For</dt>
+        <dd class="col-sm-8">
+            @if (Model.FridgeId.HasValue && Model.Fridge != null)
+            {
+                <div class="card bg-light">
+                    <div class="card-body py-2">
+                        <h6 class="card-title mb-1">
+                            <i class="fas fa-refrigerator text-primary me-2"></i>
+                            @Model.Fridge.FridgeName
+                        </h6>
+                        <div class="row small text-muted">
+                            @if (!string.IsNullOrEmpty(Model.Fridge.Brand))
+                            {
+                                <div class="col-6">
+                                    <strong>Brand:</strong> @Model.Fridge.Brand
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Fridge.SerialNumber))
+                            {
+                                <div class="col-6">
+                                    <strong>Serial:</strong> @Model.Fridge.SerialNumber
+                                </div>
+                            }
+                            @if (Model.Fridge.ProductId.HasValue && Model.Fridge.Product != null)
+                            {
+                                <div class="col-12 mt-1">
+                                    <strong>Product:</strong> @Model.Fridge.Product.Name
+                                </div>
+                            }
+                            @if (Model.Fridge.PurchaseDate != default)
+                            {
+                                <div class="col-6">
+                                    <strong>Purchased:</strong> @Model.Fridge.PurchaseDate.ToString("MMM yyyy")
+                                </div>
+                            }
+                        </div>
+                        <div class="mt-1">
+                            <span class="badge bg-success">Registered Fridge</span>
+                            @if (!string.IsNullOrEmpty(Model.Fridge.Nickname))
+                            {
+                                <span class="badge bg-info ms-1">@Model.Fridge.Nickname</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card bg-warning bg-opacity-10">
+                    <div class="card-body py-2">
+                        <h6 class="card-title mb-1">
+                            <i class="fas fa-question-circle text-warning me-2"></i>
+                            Temporary Fridge Service
+                        </h6>
+                        <p class="mb-0 small text-muted">
+                            This service was booked for a fridge not registered in the system.
+                            @if (!string.IsNullOrEmpty(Model.IssueType))
+                            {
+                                <br />
+                                <strong>Issue:</strong>
+ 
+                                @Model.IssueType
+                            }
+                        </p>
+                        <div class="mt-1">
+                            <span class="badge bg-warning text-dark">Temporary Service</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </dd>
+
+        <!-- Technician Information -->
+        <dt class="col-sm-4">Technician</dt>
+        <dd class="col-sm-8">
+            @if (Model.Employee != null)
+            {
+                @($"{Model.Employee?.FirstName} {Model.Employee?.LastName}")
+            }
+            else
+            {
+                <span class="text-muted">Not Assigned</span>
+            }
+        </dd>
+
+        @if (Model.Employee != null)
+        {
+            <dt class="col-sm-4">Technician Contact</dt>
+            <dd class="col-sm-8">
+                Phone: @Model.Employee?.ContactNumber<br />
+                Job Title: @Model.Employee?.JobTitle<br />
+                
+                Department: @Model.Employee?.Department
+                
+            </dd>
+        }
+
+        <!-- Appointment Timing -->
+        <dt class="col-sm-4">Start Time</dt>
+        <dd class="col-sm-8">@Model.StartTime.ToString("f")</dd>
+
+        <dt class="col-sm-4">End Time</dt>
+        <dd class="col-sm-8">@Model.EndTime.ToString("f")</dd>
+
+        <!-- Service Details -->
+        <dt class="col-sm-4">Issue Type</dt>
+        <dd class="col-sm-8">
+            @Model.IssueType
+            @if (!string.IsNullOrEmpty(Model.OtherIssue) && Model.IssueType == "Other")
+            {
+                <br />
+                <small class="text-muted">Details: @Model.OtherIssue</small>
+            }
+        </dd>
+
+        @if (!string.IsNullOrEmpty(Model.Notes))
+        {
+            <dt class="col-sm-4">Notes</dt>
+            <dd class="col-sm-8">@Model.Notes</dd>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.TechnicianFaults))
+        {
+            <dt class="col-sm-4">Technician Feedback</dt>
+            <dd class="col-sm-8">
+                <div class="alert alert-info py-2">
+                    <i class="fas fa-clipboard-check me-2"></i>
+                    @Model.TechnicianFaults
+                </div>
+            </dd>
+        }
+
+        <!-- Status Information -->
+        <dt class="col-sm-4">Status</dt>
+        <dd class="col-sm-8">
+            @if (Model.Status == "Completed")
+            {
+                <span class="badge bg-success">
+                    <i class="fas fa-check-circle me-1"></i>@Model.Status
+                </span>
+            }
+            else if (Model.Status == "Pending")
+            {
+                <span class="badge bg-warning text-dark">
+                    <i class="fas fa-clock me-1"></i>@Model.Status
+                </span>
+            }
+            else if (Model.Status == "Rescheduled")
+            {
+                <span class="badge bg-info">
+                    <i class="fas fa-calendar-alt me-1"></i>@Model.Status
+                </span>
+            }
+            else if (Model.Status == "Incomplete")
+            {
+                <span class="badge bg-danger">
+                    <i class="fas fa-exclamation-triangle me-1"></i>@Model.Status
+                </span>
+            }
+            else
+            {
+                <span class="badge bg-secondary">@Model.Status</span>
+            }
+        </dd>
+
+        <!-- Additional Information -->
+        @if (!string.IsNullOrEmpty(Model.Color))
+        {
+            <dt class="col-sm-4">Color Code</dt>
+            <dd class="col-sm-8">
+                <span style="display:inline-block;width:30px;height:20px;border:1px solid #ccc;background-color:@Model.Color"></span>
+                @Model.Color
+            </dd>
+        }
+
+        
+    </dl>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        <i class="fas fa-times me-1"></i>Close
+    </button>
+</div>
+
+<style>
+    .card-body {
+        padding: 0.75rem;
+    }
+
+    .badge {
+        font-size: 0.8em;
+    }
+
+    dt {
+        font-weight: 600;
+    }
+
+    dd {
+        margin-bottom: 0.5rem;
+    }
+</style>

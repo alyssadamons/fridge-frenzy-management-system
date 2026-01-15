@@ -1,0 +1,215 @@
+﻿@model E_Commerce.Models.Product
+@{
+    ViewData["Title"] = "Edit Product";
+    Layout = "~/Areas/Dashboard/Views/Shared/_Layout.cshtml";
+}
+
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="mt-4">Edit Product</h1>
+            <a asp-action="Details" asp-route-id="@Model.ProductId" class="btn btn-outline-info">
+                <i class="fas fa-eye me-2"></i>View Details
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post" enctype="multipart/form-data" class="row g-4">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                    <input type="hidden" asp-for="ProductId" />
+                    <input type="hidden" asp-for="Image" />
+
+                    <!-- Left Column - Basic Info -->
+                    <div class="col-lg-6">
+                        <div class="mb-4">
+                            <label asp-for="Name" class="form-label fw-semibold">Product Name</label>
+                            <input asp-for="Name" class="form-control form-control-lg" placeholder="Enter product name" />
+                            <span asp-validation-for="Name" class="text-danger small mt-1"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Price" class="form-label fw-semibold">Price (R)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">R</span>
+                                <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" placeholder="0.00" />
+                            </div>
+                            <span asp-validation-for="Price" class="text-danger small mt-1"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="CategoryId" class="form-label fw-semibold">Category</label>
+                            <select asp-for="CategoryId" class="form-select">
+                                <option value="">Select Category</option>
+                                @foreach (var category in ViewBag.Categories)
+                                {
+                                    <option value="@category.Id">@category.Name</option>
+                                }
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger small mt-1"></span>
+                        </div>
+                    </div>
+
+                    <!-- Right Column - Image Section -->
+                    <div class="col-lg-6">
+                        <!-- Current Image -->
+                        @if (!string.IsNullOrEmpty(Model.Image))
+                        {
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Current Image</label>
+                                <div class="border rounded-3 p-3 bg-light text-center">
+                                    <!-- FIXED: Use Url.Content for current image -->
+                                    <img src="@Url.Content($"~{Model.Image}")" alt="Current product image" class="img-fluid rounded-2 shadow-sm mb-2" style="max-height: 200px;"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                                    <div class="text-muted" style="display: none;">
+                                        <i class="fas fa-image fa-3x mb-2 d-block"></i>
+                                        <small>Current image not available</small>
+                                    </div>
+                                    <p class="text-muted small mb-0 mt-2">Current product image</p>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Image Upload -->
+                        <div class="mb-4">
+                            <label for="ImageFile" class="form-label fw-semibold">Update Product Image</label>
+                            <input type="file" name="ImageFile" id="ImageFile" class="form-control" accept="image/*" />
+                            <div class="form-text text-muted">
+                                <small>Leave empty to keep current image. Max 5MB. Supported: JPG, JPEG, PNG, GIF, WebP</small>
+                            </div>
+                        </div>
+
+                        <!-- Image Preview -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Image Preview</label>
+                            <div class="border rounded-3 p-4 bg-light text-center image-preview-container" style="min-height: 200px;">
+                                @if (!string.IsNullOrEmpty(Model.Image))
+                                {
+                                    <!-- FIXED: Use Url.Content for preview image -->
+                                    <img src="@Url.Content($"~{Model.Image}")" class="img-fluid rounded-2" style="max-height: 180px;" alt="Current preview"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                    <div class="d-flex align-items-center justify-content-center h-100 text-muted" style="display: none;">
+                                        <div>
+                                            <i class="fas fa-image fa-3x mb-2 d-block"></i>
+                                            <small>Image preview not available</small>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="d-flex align-items-center justify-content-center h-100">
+                                        <div class="text-muted">
+                                            <i class="fas fa-image fa-3x mb-2 d-block"></i>
+                                            <small>Image preview will appear here</small>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Image Info -->
+                        <div class="alert alert-info border-0">
+                            <div class="d-flex">
+                                <i class="fas fa-info-circle fa-lg me-3 mt-1 text-info"></i>
+                                <div>
+                                    <h6 class="alert-heading mb-2">Image Guidelines</h6>
+                                    <ul class="mb-0 small">
+                                        <li>Square or landscape images work best</li>
+                                        <li>Recommended size: 800x600 pixels</li>
+                                        <li>Maximum file size: 5MB</li>
+                                        <li>Supported formats: JPG, PNG, GIF, WebP</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-12">
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label fw-semibold">Product Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="6" placeholder="Enter detailed product description..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger small mt-1"></span>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="col-12">
+                        <div class="d-flex gap-2 pt-3 border-top">
+                            <button type="submit" class="btn btn-success px-4 py-2">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                            <a asp-action="Details" asp-route-id="@Model.ProductId" class="btn btn-info px-4 py-2">
+                                <i class="fas fa-eye me-2"></i>View Details
+                            </a>
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Image preview functionality
+        document.getElementById('ImageFile').addEventListener('change', function(e) {
+            const previewContainer = document.querySelector('.image-preview-container');
+            const file = e.target.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewContainer.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded-2" style="max-height: 180px;" alt="Preview">`;
+                }
+                reader.readAsDataURL(file);
+            } else {
+                // If no file selected, show current image or placeholder
+                const currentImage = '@Model.Image';
+                if (currentImage) {
+                    // Use Url.Content for the fallback image as well
+                    previewContainer.innerHTML = `<img src="@Url.Content($"~{Model.Image}")" class="img-fluid rounded-2" style="max-height: 180px;" alt="Current preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                                  <div class="d-flex align-items-center justify-content-center h-100 text-muted" style="display: none;">
+                                                      <div>
+                                                          <i class="fas fa-image fa-3x mb-2 d-block"></i>
+                                                          <small>Image preview not available</small>
+                                                      </div>
+                                                  </div>`;
+                } else {
+                    previewContainer.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 text-muted"><div><i class="fas fa-image fa-3x mb-2 d-block"></i><small>Image preview will appear here</small></div></div>';
+                }
+            }
+        });
+
+        // Price validation
+        document.querySelector('input[name="Price"]').addEventListener('change', function() {
+            if (this.value < 0) {
+                this.value = 0;
+            }
+        });
+
+        // File size validation for Edit view too
+        document.getElementById('ImageFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+
+            if (file && file.size > maxSize) {
+                alert('File size must be less than 5MB');
+                this.value = ''; // Clear the file input
+                const currentImage = '@Model.Image';
+                if (currentImage) {
+                    document.querySelector('.image-preview-container').innerHTML = `<img src="@Url.Content($"~{Model.Image}")" class="img-fluid rounded-2" style="max-height: 180px;" alt="Current preview" />`;
+                } else {
+                    document.querySelector('.image-preview-container').innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 text-muted"><div><i class="fas fa-image fa-3x mb-2 d-block"></i><small>Image preview will appear here</small></div></div>';
+                }
+            }
+        });
+    </script>
+}

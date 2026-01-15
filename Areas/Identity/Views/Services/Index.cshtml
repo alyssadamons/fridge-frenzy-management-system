@@ -1,0 +1,209 @@
+﻿@{
+    ViewData["Title"] = "Maintenance Services";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-tools text-primary"></i> Maintenance Services</h1>
+                <a href="@Url.Action("BookAppointment", "Services", new { area = "Identity" })" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Book New Service
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm hover-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-plus fa-3x text-primary mb-3"></i>
+                    <h4 class="card-title">Book Service</h4>
+                    <p class="card-text">Schedule a maintenance appointment for your refrigeration equipment.</p>
+                    <a href="@Url.Action("BookAppointment", "Services", new { area = "Identity" })" class="btn btn-outline-primary">
+                        Book Now <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm hover-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-snowflake fa-3x text-info mb-3"></i>
+                    <h4 class="card-title">My Fridges</h4>
+                    <p class="card-text">View and manage your registered fridges and their service history.</p>
+                    <a href="@Url.Action("MyFridges", "Services", new { area = "Identity" })" class="btn btn-outline-info">
+                        Manage Fridges <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm hover-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-history fa-3x text-success mb-3"></i>
+                    <h4 class="card-title">My Appointments</h4>
+                    <p class="card-text">View, edit, or cancel your upcoming maintenance appointments.</p>
+                    <a href="@Url.Action("MyAppointments", "Services", new { area = "Identity" })" class="btn btn-outline-success">
+                        View Appointments <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 offset-md-3 mb-4">
+            <div class="card h-100 shadow-sm hover-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-headset fa-3x text-warning mb-3"></i>
+                    <h4 class="card-title">Support</h4>
+                    <p class="card-text">Need immediate assistance? Contact our support team.</p>
+                    <a href="tel:+27810286437" class="btn btn-outline-warning">
+                        Call Support <i class="fas fa-phone ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Service Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary"><i class="fas fa-wrench me-2"></i>Our Maintenance Services Include:</h6>
+                            <ul class="list-unstyled ms-3">
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Compressor Repair & Replacement</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Gas Refill & Refrigerant Leak Detection</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Thermostat Calibration & Replacement</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Door Seal & Gasket Replacement</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Electrical Fault Diagnosis</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Fan Motor Repair</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Water Leakage Solutions</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Ice Maker Servicing</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>General Cleaning & Maintenance</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Temperature Control Issues</li>
+                            </ul>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="text-primary"><i class="fas fa-calendar-alt me-2"></i>Appointment Guidelines:</h6>
+                            <div class="alert alert-info alert-permanent mb-3">
+                                <strong><i class="fas fa-clock me-1"></i> Business Hours:</strong><br>
+                                Monday - Saturday: 8:00 AM - 5:00 PM<br>
+                                <small class="text-muted">No Sunday appointments available</small>
+                            </div>
+
+                            <div class="alert alert-warning alert-permanent mb-3">
+                                <strong><i class="fas fa-edit me-1"></i> Appointment Management:</strong><br>
+                                You can edit or cancel appointments with status:<br>
+                                <span class="badge bg-warning text-dark">Incomplete</span> - Awaiting technician assignment<br>
+                                <small class="text-muted">Once assigned, contact support to reschedule</small>
+                            </div>
+
+                            <div class="alert alert-success alert-permanent mb-0">
+                                <strong><i class="fas fa-shield-alt me-1"></i> Emergency Service:</strong><br>
+                                Available for critical breakdowns<br>
+                                <strong>Call: 081 028 6437</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        console.log('Services Index page loaded');
+
+        // Update cart count on page load
+         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM ready - updating cart count');
+            if (typeof updateCartCount === 'function') {
+                updateCartCount();
+            }
+        });
+        setTimeout(function() {
+            console.log('Delayed cart count update');
+            if (typeof updateCartCount === 'function') {
+                updateCartCount();
+            }
+        }, 1000);
+        // Function to update cart count
+        async function updateCartCount() {
+            try {
+               const response = await fetch('@Url.Action("GetCartCount", "Cart", new { area = "" })', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    console.log('⚠ Cart count fetch returned:', response.status);
+                    return;
+                }
+
+                const data = await response.json();
+                console.log('✅ Cart count data:', data);
+
+                if (data && data.count !== undefined) {
+                    const cartBadge = document.getElementById('cartCount');
+                    if (cartBadge) {
+                        cartBadge.textContent = data.count;
+                        cartBadge.style.display = data.count > 0 ? 'inline-block' : 'none';
+                        console.log('✅ Cart badge updated to:', data.count);
+                    } else {
+                        console.warn('⚠ Cart badge element not found');
+                    }
+                } else {
+                    console.warn('⚠ Invalid cart count response:', data);
+                }
+            } catch (error) {
+                console.error('❌ Error updating cart count:', error);
+            }
+        }
+
+        // Make updateCartCount available globally
+        window.updateCartCount = updateCartCount;
+    </script>
+
+    <style>
+        .hover-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+            .hover-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.15) !important;
+            }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-info:hover,
+        .btn-outline-success:hover,
+        .btn-outline-warning:hover,
+        .btn-outline-secondary:hover {
+            transform: scale(1.05);
+        }
+
+        .alert-permanent {
+            margin-bottom: 1rem;
+        }
+    </style>
+}

@@ -1,0 +1,476 @@
+﻿@model E_Commerce.Areas.Identity.ViewModels.AppointmentWithFridgeViewModel
+@{
+    ViewData["Title"] = "Edit Appointment";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="appointment-booking-wrapper">
+    <div class="container py-3">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+
+                <!-- Page Header -->
+                <div class="text-center mb-3">
+                    <div class="appointment-icon-wrapper mb-2">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <h2 class="h4 fw-bold mb-1">Edit Appointment</h2>
+                    <p class="text-muted small">Update your maintenance appointment details</p>
+                </div>
+
+                <!-- Main Card -->
+                <div class="appointment-card shadow-sm">
+                    <div class="card-body p-3">
+
+                        <!-- Alerts -->
+                        <div id="alertContainer" class="mb-3">
+                            @if (TempData["Error"] != null)
+                            {
+                                <div class="alert alert-danger alert-dismissible fade show py-2">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    @TempData["Error"]
+                                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+                                </div>
+                            }
+                        </div>
+
+                        <form id="editAppointmentForm" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@ViewContext.RouteData.Values["id"]" />
+
+                            <!-- STEP 1: FRIDGE SELECTION -->
+                            <div class="form-section mb-3">
+                                <div class="section-header mb-2">
+                                    <span class="step-badge">1</span>
+                                    <div>
+                                        <h5 class="section-title mb-0">Select Your Fridge</h5>
+                                        <p class="section-subtitle">Choose which fridge needs service</p>
+                                    </div>
+                                </div>
+
+                                @if (Model.CustomerFridges != null && Model.CustomerFridges.Any())
+                                {
+                                    <div class="registered-fridges mb-2">
+                                        @foreach (var fridge in Model.CustomerFridges)
+                                        {
+                                            <label class="fridge-card" for="fridge_@fridge.Id">
+                                                <input class="fridge-radio" type="radio"
+                                                       name="SelectedFridgeId" value="@fridge.Id"
+                                                       id="fridge_@fridge.Id"
+                                                       @(Model.SelectedFridgeId == fridge.Id ? "checked" : "")>
+                                                <div class="fridge-card-content">
+                                                    <div class="fridge-icon">
+                                                        <i class="fas fa-refrigerator"></i>
+                                                    </div>
+                                                    <div class="fridge-details">
+                                                        <h6 class="fridge-name">@fridge.FridgeName</h6>
+                                                        @if (!string.IsNullOrEmpty(fridge.Brand))
+                                                        {
+                                                            <span class="fridge-meta">@fridge.Brand</span>
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(fridge.SerialNumber))
+                                                        {
+                                                            <span class="fridge-meta">SN: @fridge.SerialNumber</span>
+                                                        }
+                                                    </div>
+                                                    <div class="fridge-checkmark">
+                                                        <i class="fas fa-check-circle"></i>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        }
+                                    </div>
+
+                                    <div class="divider-wrapper mb-2">
+                                        <div class="divider-line"></div>
+                                        
+                                    </div>
+                                }
+                            </div>
+
+
+
+                            <!-- STEP 2: SERVICE DETAILS -->
+                            <div class="form-section mb-3">
+                                <div class="section-header mb-2">
+                                    <span class="step-badge">2</span>
+                                    <div>
+                                        <h5 class="section-title mb-0">Service Details</h5>
+                                        <p class="section-subtitle">Update what needs to be fixed</p>
+                                    </div>
+                                </div>
+
+                                <div class="row g-2">
+                                    <div class="col-12">
+                                        <label for="IssueType" class="form-label small fw-semibold">Issue Type <span class="text-danger">*</span></label>
+                                        <select class="form-select form-select-sm" id="IssueType" name="IssueType" required>
+                                            <option value="">Select issue type...</option>
+                                            <option value="Compressor Repair">Compressor Repair</option>
+                                            <option value="Gas Refill / Refrigerant Leak">Gas Refill / Refrigerant Leak</option>
+                                            <option value="Thermostat Replacement">Thermostat Replacement</option>
+                                            <option value="Door Seal / Gasket Replacement">Door Seal / Gasket Replacement</option>
+                                            <option value="Electrical Fault">Electrical Fault</option>
+                                            <option value="Fan Motor Repair">Fan Motor Repair</option>
+                                            <option value="Water Leakage">Water Leakage</option>
+                                            <option value="Ice Maker Fault">Ice Maker Fault</option>
+                                            <option value="General Service / Cleaning">General Service / Cleaning</option>
+                                            <option value="Temperature Control Issue">Temperature Control Issue</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12" id="otherIssueWrapper" style="display:none;">
+                                        <label for="OtherIssue" class="form-label small fw-semibold">Describe Issue <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-control-sm" id="OtherIssue" name="OtherIssue"
+                                               placeholder="Please describe the issue..." value="@Model.OtherIssue">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="PreferredDateTime" class="form-label small fw-semibold">Preferred Date & Time <span class="text-danger">*</span></label>
+                                        <input type="datetime-local" class="form-control form-control-sm" id="PreferredDateTime"
+                                               name="PreferredDateTime"
+                                               value="@Model.PreferredDateTime.ToString("yyyy-MM-ddTHH:mm")"
+                                               min="@DateTime.Now.AddDays(1).ToString("yyyy-MM-ddTHH:mm")" required>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label for="Notes" class="form-label small fw-semibold">Additional Notes <span class="text-muted">(Optional)</span></label>
+                                        <textarea class="form-control form-control-sm" id="Notes" name="Notes" rows="2"
+                                                  placeholder="Any special instructions or additional details...">@Model.Notes</textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- INFO BOX -->
+                            <div class="info-box mb-3">
+                                <div class="info-box-header">
+                                    <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                                    <strong class="small">Important Notice</strong>
+                                </div>
+                                <div class="mt-2">
+                                    <p class="mb-2 small">
+                                        When you edit an appointment, its status will change to "Incomplete" and our admin team will need to review and confirm the changes.
+                                    </p>
+                                    <p class="mb-0 small text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Any assigned technician will be unassigned and the appointment will need to be reassigned.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- ACTION BUTTONS -->
+                            <div class="action-buttons">
+                                <a href="@Url.Action("MyAppointments", "Services", new { area = "Identity" })"
+                                   class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-arrow-left me-1"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-warning btn-sm" id="submitButton">
+                                    <i class="fas fa-save me-1"></i>Update Appointment
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    $(document).ready(function () {
+        // Set initial issue type
+        $('#IssueType').val('@Model.IssueType');
+
+        // Show/hide Other issue field
+        $('#IssueType').change(function () {
+            const isOther = $(this).val() === 'Other';
+            $('#otherIssueWrapper').toggle(isOther);
+            $('#OtherIssue').prop('required', isOther);
+        }).trigger('change');
+
+        // Fridge radio selection handling
+        $('.fridge-radio').change(function () {
+            $('.fridge-card').removeClass('selected');
+            $(this).closest('.fridge-card').addClass('selected');
+        });
+
+        // Trigger on page load
+        $('.fridge-radio:checked').trigger('change');
+
+        // Set minimum datetime (tomorrow 8AM)
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(8, 0, 0, 0);
+        if (tomorrow.getDay() === 0) tomorrow.setDate(tomorrow.getDate() + 1);
+        $('#PreferredDateTime').attr('min', tomorrow.toISOString().slice(0, 16));
+
+        // AJAX form submission
+        $('#editAppointmentForm').on('submit', function (e) {
+            e.preventDefault();
+            const $btn = $('#submitButton');
+            const $alert = $('#alertContainer');
+
+            $alert.empty();
+            $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Updating...');
+
+            // Get form data
+            const formData = $(this).serialize();
+            console.log('Submitting form data:', formData);
+
+            $.ajax({
+                url: '@Url.Action("EditAppointment", "Services", new { area = "Identity" })',
+                type: 'POST',
+                data: formData,
+                success: function (response, status, xhr) {
+                    console.log('Server response status:', status);
+                    console.log('Full response:', response);
+
+                    // Check if response is HTML (error page) or JSON
+                    const contentType = xhr.getResponseHeader('content-type');
+                    console.log('Content-Type:', contentType);
+
+                    if (contentType && contentType.includes('application/json')) {
+                        // It's JSON
+                        try {
+                            if (response.success) {
+                                showSuccessMessage(response.message || 'Appointment updated successfully!');
+                                setTimeout(() => {
+                                    const redirectUrl = response.redirectUrl || '@Url.Action("MyAppointments", "Services", new { area = "Identity" })';
+                                    window.location.href = redirectUrl;
+                                }, 2000);
+                            } else {
+                                showErrorMessage(response.message || 'An error occurred', response.errors);
+                                $btn.prop('disabled', false).html('<i class="fas fa-save me-1"></i>Update Appointment');
+                            }
+                        } catch (e) {
+                            console.error('JSON parsing error:', e);
+                            showErrorMessage('Error processing response. Please try again.');
+                            $btn.prop('disabled', false).html('<i class="fas fa-save me-1"></i>Update Appointment');
+                        }
+                    } else {
+                        // It's HTML (likely an error page or redirect)
+                        console.log('Received HTML response, assuming success with redirect');
+                        showSuccessMessage('Appointment updated successfully!');
+                        setTimeout(() => {
+                            window.location.href = '@Url.Action("MyAppointments", "Services", new { area = "Identity" })';
+                        }, 1500);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('AJAX error:', status, error);
+                    console.error('XHR status:', xhr.status);
+                    console.error('XHR response:', xhr.responseText);
+
+                    let errorMessage = 'Failed to update appointment. Please try again.';
+
+                    // Try to extract error message from response
+                    if (xhr.responseText) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response && response.message) {
+                                errorMessage = response.message;
+                            }
+                        } catch (e) {
+                            // If not JSON, check if it's HTML with error
+                            if (xhr.responseText.includes('alert') || xhr.responseText.includes('error')) {
+                                errorMessage = 'Server error occurred. Please check your input and try again.';
+                            }
+                        }
+                    }
+
+                    showErrorMessage(errorMessage);
+                    $btn.prop('disabled', false).html('<i class="fas fa-save me-1"></i>Update Appointment');
+                }
+            });
+        });
+
+        // Helper functions for showing messages
+        function showSuccessMessage(message) {
+            const $alert = $('#alertContainer');
+            $alert.html(`
+                <div class="alert alert-success alert-dismissible fade show py-2">
+                    <i class="fas fa-check-circle me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+                </div>
+            `);
+        }
+
+        function showErrorMessage(message, errors = null) {
+            const $alert = $('#alertContainer');
+            $alert.html(`
+                <div class="alert alert-danger alert-dismissible fade show py-2">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    ${message}
+                    ${errors ? '<br><small>' + errors.join('<br>') + '</small>' : ''}
+                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+                </div>
+            `);
+        }
+
+        // Prevent auto-dismissal of alerts
+        $('body').on('closed.bs.alert', function () {
+            // Don't remove the alert, just hide it
+            console.log('Alert closed by user');
+        });
+    });
+</script>
+
+
+}
+
+    <style>
+        /* Use the same styles as your Book Appointment page */
+        .appointment-booking-wrapper {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+
+        .appointment-card {
+            border: none;
+            border-radius: 12px;
+            background: white;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .appointment-icon-wrapper {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+            .appointment-icon-wrapper i {
+                font-size: 1.5rem;
+                color: white;
+            }
+
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: #ffc107;
+            color: white;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .fridge-card {
+            display: block;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+            .fridge-card:hover {
+                border-color: #ffc107;
+                background: #fffbf0;
+            }
+
+            .fridge-card.selected {
+                border-color: #ffc107;
+                background: #fffbf0;
+            }
+
+        .fridge-radio {
+            display: none;
+        }
+
+        .fridge-card-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .fridge-icon {
+            width: 40px;
+            height: 40px;
+            background: #fff3cd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffc107;
+        }
+
+        .fridge-checkmark {
+            color: #28a745;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .fridge-card.selected .fridge-checkmark {
+            opacity: 1;
+        }
+
+        .divider-wrapper {
+            display: flex;
+            align-items: center;
+            margin: 16px 0;
+        }
+
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: #e9ecef;
+        }
+
+        .divider-text {
+            padding: 0 12px;
+            color: #6c757d;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .info-box {
+            background: #fffbf0;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .info-box-header {
+            color: #e67e22;
+            font-size: 0.9rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            padding-top: 16px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            border: none;
+            color: white;
+        }
+
+            .btn-warning:hover {
+                background: linear-gradient(135deg, #e0a800 0%, #e55a00 100%);
+                color: white;
+            }
+    </style>
+}

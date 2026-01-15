@@ -1,0 +1,329 @@
+﻿@{
+    Layout = "~/Areas/Dashboard/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Appointments Calendar";
+}
+
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Appointments Calendar</h1>
+
+        <!-- Calendar Controls -->
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-primary" id="btnCreateAppointment">
+                                <i class="fas fa-plus"></i> New Appointment
+                            </button>
+                            <a asp-area="Dashboard" asp-controller="Appointments" asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-list"></i> List View
+                            </a>
+                            <a asp-area="Dashboard" asp-controller="Appointments" asp-action="PastAppointments" class="btn btn-outline-warning">
+                                <i class="fas fa-history"></i> Past Appointments
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <select id="technicianFilter" class="form-select form-select-sm d-inline-block w-auto">
+                            <option value="">All Technicians</option>
+                            @if (ViewBag.Technicians != null)
+                            {
+                                foreach (var tech in ViewBag.Technicians)
+                                {
+                                    <option value="@tech.EmployeeID">@tech.FullName</option>
+                                }
+                            }
+                        </select>
+                        <button id="refreshCalendar" class="btn btn-outline-secondary btn-sm ms-2">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-2">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- AJAX Modal -->
+<div class="modal fade" id="ajaxModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" id="ajaxModalContent"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+
+    <style>
+        /* Make calendar more compact */
+        #calendar {
+            max-width: 100%;
+            font-size: 0.875rem;
+        }
+
+        .fc .fc-toolbar-title {
+            font-size: 1.5rem;
+        }
+
+        .fc .fc-button {
+            padding: 0.4rem 0.65rem;
+            font-size: 0.875rem;
+        }
+
+        .fc-daygrid-event {
+            font-size: 0.8rem;
+        }
+
+        /* Capitalize button text */
+        .fc-today-button,
+        .fc-dayGridMonth-button,
+        .fc-timeGridWeek-button,
+        .fc-timeGridDay-button,
+        .fc-listWeek-button {
+            text-transform: capitalize !important;
+        }
+        /* Calendar event status styles */
+        .fc-event-pending {
+            border-left: 4px solid #e0a800 !important;
+        }
+
+        .fc-event-completed {
+            border-left: 4px solid #218838 !important;
+        }
+
+        .fc-event-incomplete {
+            border-left: 4px solid #b21f2d !important;
+        }
+
+        /* Make completed events slightly transparent to distinguish them */
+        .fc-event-completed {
+            opacity: 0.8;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            const technicianFilter = document.getElementById('technicianFilter');
+            const refreshButton = document.getElementById('refreshCalendar');
+
+            // Initialize calendar
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                height: 'auto',
+                contentHeight: 650,
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+                },
+                buttonText: {
+                    today: 'Today',
+                    month: 'Month',
+                    week: 'Week',
+                    day: 'Day',
+                    list: 'List'
+                },
+                navLinks: true,
+                editable: true,
+                dayMaxEvents: 3,
+                slotMinTime: "08:00:00",
+                slotMaxTime: "17:00:00",
+                allDaySlot: false,
+                events: function(fetchInfo, successCallback, failureCallback) {
+                    const technicianId = technicianFilter ? technicianFilter.value : '';
+                        const urls = [
+            `/Dashboard/Appointments/GetAppointments?technicianId=${technicianId}`,
+            `GetAppointments?technicianId=${technicianId}`,
+            `./GetAppointments?technicianId=${technicianId}`
+        ];
+
+                    fetch(`/Dashboard/Appointments/GetAppointments?technicianId=${technicianId}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            successCallback(data);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching appointments:', error);
+                            successCallback([]);
+                        });
+                },
+                eventClick: function(info) {
+                    const eventId = info.event.id;
+                    openModal(`/Dashboard/Appointments/ViewModal/${eventId}`);
+                },
+                eventDrop: function(info) {
+                    updateAppointmentTime(info.event.id, info.event.start, info.event.end);
+                },
+                eventResize: function(info) {
+                    updateAppointmentTime(info.event.id, info.event.start, info.event.end);
+                },
+                eventDidMount: function(info) {
+                    const status = info.event.extendedProps.status;
+                    applyEventStyles(info.el, status);
+                }
+            });
+
+            calendar.render();
+
+            // Technician filter change
+            if (technicianFilter) {
+                technicianFilter.addEventListener('change', function() {
+                    calendar.refetchEvents();
+                });
+            }
+
+            // Refresh button
+            if (refreshButton) {
+                refreshButton.addEventListener('click', function() {
+                    calendar.refetchEvents();
+                });
+            }
+
+            // Create appointment button
+            const createBtn = document.getElementById('btnCreateAppointment');
+            if (createBtn) {
+                createBtn.addEventListener('click', function() {
+                    openModal('/Dashboard/Appointments/CreateModal');
+                });
+            }
+
+            // Modal functions
+            const ajaxModalEl = document.getElementById('ajaxModal');
+            const ajaxModal = new bootstrap.Modal(ajaxModalEl);
+
+            function openModal(url) {
+                fetch(url)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return res.text();
+                    })
+                    .then(html => {
+                        document.getElementById('ajaxModalContent').innerHTML = html;
+                        ajaxModal.show();
+                    })
+                    .catch(error => {
+                        console.error('Error loading modal:', error);
+                        alert('Error loading form. Please try again.');
+                    });
+            }
+
+            function updateAppointmentTime(id, start, end) {
+                const data = {
+                    id: id,
+                    start: start.toISOString(),
+                    end: end ? end.toISOString() : start.toISOString()
+                };
+
+                fetch('/Dashboard/Appointments/UpdateDate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to update appointment time');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Appointment time updated successfully');
+                    calendar.refetchEvents();
+                })
+                .catch(error => {
+                    console.error('Error updating appointment time:', error);
+                    calendar.refetchEvents();
+                    alert('Error updating appointment time. Please try again.');
+                });
+            }
+
+                    function applyEventStyles(element, status) {
+            
+            element.classList.remove('fc-event-pending', 'fc-event-completed', 'fc-event-incomplete');
+
+            switch (status?.toLowerCase()) {
+                case 'pending':
+                    element.style.backgroundColor = '#ffc107';
+                    element.style.borderColor = '#e0a800';
+                    element.classList.add('fc-event-pending');
+                    break;
+                case 'completed':
+                    element.style.backgroundColor = '#28a745';
+                    element.style.borderColor = '#218838';
+                    element.style.color = 'white';
+                    element.classList.add('fc-event-completed');
+                    break;
+                case 'incomplete':
+                    element.style.backgroundColor = '#dc3545';
+                    element.style.borderColor = '#b21f2d';
+                    element.style.color = 'white';
+                    element.classList.add('fc-event-incomplete');
+                    break;
+                case 'rescheduled':
+                    element.style.backgroundColor = '#17a2b8';
+                    element.style.borderColor = '#138496';
+                    element.style.color = 'white';
+                    break;
+                default:
+                    element.style.backgroundColor = '#6c757d';
+                    element.style.borderColor = '#545b62';
+                    break;
+            }
+        }
+
+            window.openModal = openModal;
+            window.submitModalForm = function(form) {
+                const formData = new FormData(form);
+                fetch(form.action, {
+                    method: form.method,
+                    body: formData
+                })
+                .then(res => {
+                    const contentType = res.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        return res.json();
+                    } else {
+                        return res.text();
+                    }
+                })
+                .then(result => {
+                    if (result === 'OK' || (result && result.success)) {
+                        ajaxModal.hide();
+                        calendar.refetchEvents();
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else if (typeof result === 'string' && result.includes('form')) {
+                        document.getElementById('ajaxModalContent').innerHTML = result;
+                    } else {
+                        ajaxModal.hide();
+                        calendar.refetchEvents();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error submitting form:', error);
+                    alert('Error submitting form. Please try again.');
+                });
+                return false;
+            };
+        });
+    </script>
+}

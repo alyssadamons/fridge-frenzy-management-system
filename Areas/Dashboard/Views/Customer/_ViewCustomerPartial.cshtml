@@ -1,0 +1,146 @@
+﻿@model E_Commerce.Areas.Dashboard.Models.Customer
+
+@{
+    var upcomingAppointments = ViewBag.UpcomingAppointments as List<Dictionary<string, object>>;
+    var pastAppointments = ViewBag.PastAppointments as List<Dictionary<string, object>>;
+
+}
+
+<div class="modal-header bg-info text-white">
+    <h5 class="modal-title"><i class="fas fa-eye"></i> Customer Details</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h6 class="mb-0"><i class="fas fa-building me-2"></i>Company Information</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Company:</strong> @Model.Name</p>
+                    <p><strong>Owner:</strong> @(string.IsNullOrEmpty(Model.Owner) ? "Not specified" : Model.Owner)</p>
+                    <p><strong>Phone:</strong> @Model.ContactNumber</p>
+                    <p><strong>Email:</strong> @Model.Email</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Address:</strong> @Model.StreetNumber @Model.StreetName</p>
+                    <p><strong>Suburb:</strong> @(string.IsNullOrEmpty(Model.Suburb) ? "Not specified" : Model.Suburb)</p>
+                    <p><strong>City:</strong> @(string.IsNullOrEmpty(Model.City) ? "Not specified" : Model.City)</p>
+                    <p><strong>Postal Code:</strong> @(string.IsNullOrEmpty(Model.PostalCode) ? "Not specified" : Model.PostalCode)</p>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                <p><strong>Notes:</strong> @Model.Notes</p>
+            }
+            <p>
+                <strong>Status:</strong>
+                @if (Model.IsActive && !Model.IsDeleted)
+                {
+                    <span class="badge bg-success">Active</span>
+                }
+                else if (Model.IsDeleted)
+                {
+                    <span class="badge bg-secondary">Deleted</span>
+                }
+                else
+                {
+                    <span class="badge bg-warning">Inactive</span>
+                }
+            </p>
+        </div>
+    </div>
+
+    @if (upcomingAppointments != null && upcomingAppointments.Any())
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Upcoming Appointments (@upcomingAppointments.Count)</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Technician</th>
+                                <th>Start</th>
+                                <th>End</th>
+                                <th>Issue</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var appt in upcomingAppointments)
+                            {
+                                <tr>
+                                    <td>@appt["EmployeeName"]</td>
+                                    <td>@(((DateTime)appt["StartTime"]).ToString("g"))</td>
+                                    <td>@(((DateTime)appt["EndTime"]).ToString("g"))</td>
+                                    <td>@appt["IssueType"]</td>
+                                    <td><span class="badge bg-info">@appt["Status"]</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info mb-4">
+            <i class="fas fa-info-circle me-2"></i>No upcoming appointments scheduled.
+        </div>
+    }
+
+    @if (pastAppointments != null && pastAppointments.Any())
+    {
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <h6 class="mb-0"><i class="fas fa-history me-2"></i>Past Appointments (@pastAppointments.Count)</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Technician</th>
+                                <th>Start</th>
+                                <th>End</th>
+                                <th>Issue</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var appt in pastAppointments)
+                            {
+                                <tr>
+                                    <td>@appt["EmployeeName"]</td>
+                                    <td>@(((DateTime)appt["StartTime"]).ToString("g"))</td>
+                                    <td>@(((DateTime)appt["EndTime"]).ToString("g"))</td>
+                                    <td>@appt["IssueType"]</td>
+                                    <td><span class="badge bg-secondary">@appt["Status"]</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>No past appointments found.
+        </div>
+    }
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+

@@ -1,0 +1,137 @@
+﻿@model E_Commerce.Models.Product
+
+@{
+    ViewData["Title"] = "Product Details";
+    Layout = "~/Areas/Dashboard/Views/Shared/_Layout.cshtml";
+}
+
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="mt-4">Product Details</h1>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to List
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <div class="row align-items-stretch">
+                    <!-- Image Section -->
+                    <div class="col-lg-5 mb-4 mb-lg-0">
+                        <div class="product-image-container bg-light rounded-3 p-4 h-100 d-flex align-items-center justify-content-center">
+                            @if (!string.IsNullOrEmpty(Model.Image))
+                            {
+                                <!-- FIXED: Use Url.Content for consistent path resolution -->
+                                <img src="@Url.Content($"~{Model.Image}")" alt="@Model.Name" class="img-fluid rounded-3 shadow-sm" style="max-height: 400px; width: auto;"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                <div class="text-center text-muted" style="display: none;">
+                                    <i class="fas fa-box fa-5x mb-3"></i>
+                                    <p class="mb-0">Image Not Available</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-box fa-5x mb-3"></i>
+                                    <p class="mb-0">No Image Available</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Details Section -->
+                    <div class="col-lg-7">
+                        <div class="ps-lg-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <h2 class="text-primary mb-0 me-3">@Model.Name</h2>
+                                <span class="badge bg-success fs-6">Product</span>
+                            </div>
+
+                            <!-- Price -->
+                            <div class="mb-4">
+                                <h3 class="text-success mb-2">
+                                    <i class="fas fa-tag me-2 text-muted"></i>R @Model.Price.ToString("F2")
+                                </h3>
+                            </div>
+
+                            <!-- Category -->
+                            <div class="mb-4">
+                                <h5 class="text-dark mb-2">
+                                    <i class="fas fa-tags me-2 text-muted"></i>Category
+                                </h5>
+                                <div class="d-flex align-items-center">
+                                    @if (Model.Category != null)
+                                    {
+                                        <span class="badge bg-primary fs-6">@Model.Category.Name</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">No category assigned</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-4">
+                                <h5 class="text-dark mb-3">
+                                    <i class="fas fa-align-left me-2 text-muted"></i>Description
+                                </h5>
+                                <div class="description-box p-4 bg-light rounded-3 border">
+                                    @if (!string.IsNullOrEmpty(Model.Description))
+                                    {
+                                        <p class="mb-0 text-dark lh-lg">@Model.Description</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="mb-0 text-muted fst-italic">No description available for this product.</p>
+                                    }
+                                </div>
+                            </div>
+
+                            
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a asp-action="Edit" asp-route-id="@Model.ProductId" class="btn btn-primary px-4">
+                                    <i class="fas fa-edit me-2"></i>Edit Product
+                                </a>
+                                <a asp-action="Index" class="btn btn-outline-secondary px-4">
+                                    <i class="fas fa-list me-2"></i>All Products
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    .product-image-container {
+        min-height: 400px;
+        border: 2px dashed #dee2e6;
+    }
+
+    .description-box {
+        min-height: 150px;
+        max-height: 300px;
+        overflow-y: auto;
+        line-height: 1.7;
+    }
+
+        .description-box::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .description-box::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .description-box::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+</style>

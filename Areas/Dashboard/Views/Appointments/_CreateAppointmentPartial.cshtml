@@ -1,0 +1,288 @@
+﻿@model E_Commerce.Areas.Dashboard.Models.Appointment
+
+<div class="modal-header bg-success text-white">
+    <h5 class="modal-title"><i class="fas fa-plus"></i> Create Appointment</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <form id="createAppointmentForm" asp-action="CreateModal" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label asp-for="CustomerID" class="form-label">Customer *</label>
+            <select asp-for="CustomerID" class="form-select" required asp-items="@(new SelectList(ViewBag.Customers, "CustomerID", "Name"))">
+                <option value="">-- Select Customer --</option>
+            </select>
+            <span asp-validation-for="CustomerID" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="EmployeeID" class="form-label">Technician</label>
+            <select asp-for="EmployeeID" class="form-select" asp-items="@(new SelectList(ViewBag.Technicians, "EmployeeID", "FullName"))">
+                <option value="">-- Select Technician (Optional) --</option>
+            </select>
+            <small class="form-text text-muted">Leave unassigned for customer-created appointments</small>
+            <span asp-validation-for="EmployeeID" class="text-danger"></span>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="StartTime" class="form-label">Start Time *</label>
+                <input asp-for="StartTime" type="datetime-local" class="form-control" id="startTimeInput" required
+                       min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                <span asp-validation-for="StartTime" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="EndTime" class="form-label">End Time *</label>
+                <input asp-for="EndTime" type="datetime-local" class="form-control" id="endTimeInput" required />
+                <span asp-validation-for="EndTime" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="IssueType" class="form-label">Issue Type *</label>
+            <select asp-for="IssueType" class="form-select" id="issueTypeSelect" required>
+                <option value="">-- Select Issue Type --</option>
+                <option value="Compressor Repair">Compressor Repair</option>
+                <option value="Gas Refill / Refrigerant Leak">Gas Refill / Refrigerant Leak</option>
+                <option value="Thermostat Replacement">Thermostat Replacement</option>
+                <option value="Door Seal / Gasket Replacement">Door Seal / Gasket Replacement</option>
+                <option value="Electrical Fault">Electrical Fault</option>
+                <option value="Fan Motor Repair">Fan Motor Repair</option>
+                <option value="Water Leakage">Water Leakage</option>
+                <option value="Ice Maker Fault">Ice Maker Fault</option>
+                <option value="General Service / Cleaning">General Service / Cleaning</option>
+                <option value="Temperature Control Issue">Temperature Control Issue</option>
+                <option value="Other">Other</option>
+            </select>
+            <span asp-validation-for="IssueType" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3" id="otherIssueWrapper" style="display:none;">
+            <label asp-for="OtherIssue" class="form-label">Please specify issue *</label>
+            <input asp-for="OtherIssue" class="form-control" id="otherIssueInput" />
+            <span asp-validation-for="OtherIssue" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Notes" class="form-label">Additional Notes</label>
+            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Notes" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Status" class="form-label">Status *</label>
+            <select asp-for="Status" class="form-select" id="statusSelect" required>
+                <option value="Pending">Pending</option>
+                <option value="Completed">Completed</option>
+                <option value="Rescheduled">Rescheduled</option>
+                <option value="Incomplete">Incomplete (No Technician Assigned)</option>
+            </select>
+            <span asp-validation-for="Status" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Color" class="form-label">Event Color</label>
+            <div class="input-group">
+                <input asp-for="Color" type="color" class="form-control form-control-color" value="#3788d8" />
+                <span class="input-group-text" id="colorText">#3788d8</span>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="button" class="btn btn-success" onclick="submitModalForm(document.getElementById('createAppointmentForm'))">
+        <i class="fas fa-save"></i> Create Appointment
+    </button>
+</div>
+
+<script>
+    // Initialize when modal loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const startInput = document.getElementById('startTimeInput');
+        const endInput = document.getElementById('endTimeInput');
+        const issueTypeSelect = document.getElementById('issueTypeSelect');
+        const otherIssueWrapper = document.getElementById('otherIssueWrapper');
+        const otherIssueInput = document.getElementById('otherIssueInput');
+        const colorInput = document.querySelector('input[type="color"]');
+        const colorText = document.getElementById('colorText');
+
+        // Set default end time to 1 hour after start time
+        function setDefaultEndTime() {
+            if (startInput && startInput.value) {
+                const startDate = new Date(startInput.value);
+                if (!isNaN(startDate)) {
+                    let endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1 hour later
+
+                    // Ensure it doesn't go past 5 PM
+                    if (endDate.getHours() >= 17) {
+                        endDate = new Date(startDate);
+                        endDate.setHours(17, 0, 0, 0);
+                    }
+
+                    if (endInput) {
+                        endInput.value = formatDateTimeForInput(endDate);
+                    }
+                }
+            }
+        }
+            // Show technician requirement based on status
+    const statusSelect = document.getElementById('statusSelect');
+    const technicianSelect = document.querySelector('select[name="EmployeeID"]');
+
+    function updateTechnicianRequirement() {
+        if (statusSelect.value === 'Incomplete') {
+            technicianSelect.required = false;
+            technicianSelect.closest('.mb-3').querySelector('.form-text').textContent = 'Leave unassigned for incomplete appointments';
+        } else {
+            technicianSelect.required = true;
+            technicianSelect.closest('.mb-3').querySelector('.form-text').textContent = 'Required for this appointment type';
+        }
+    }
+
+    if (statusSelect) {
+        statusSelect.addEventListener('change', updateTechnicianRequirement);
+        updateTechnicianRequirement(); // Initialize
+    }
+
+        // Format date for datetime-local input (YYYY-MM-DDTHH:MM)
+        function formatDateTimeForInput(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        // Initialize end time when start time changes
+        if (startInput) {
+            startInput.addEventListener('change', setDefaultEndTime);
+
+            // Set initial end time if start time has a value
+            if (startInput.value) {
+                setDefaultEndTime();
+            } else {
+                // Set default start time to current datetime rounded to nearest 15 minutes
+                const now = new Date();
+                now.setMinutes(Math.ceil(now.getMinutes() / 15) * 15);
+                startInput.value = formatDateTimeForInput(now);
+                setDefaultEndTime();
+            }
+
+            // Strict validation for datetime input
+            startInput.addEventListener('input', function(e) {
+                const value = e.target.value;
+                // If user tries to type more than 16 characters, truncate
+                if (value.length > 16) {
+                    e.target.value = value.substring(0, 16);
+                }
+            });
+
+            // Prevent invalid characters
+            startInput.addEventListener('keypress', function(e) {
+                const char = String.fromCharCode(e.keyCode || e.which);
+                // Only allow numbers, dash, colon, and T
+                if (!/[\d\-:T]/.test(char)) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        // Apply same validation to end input
+        if (endInput) {
+            endInput.addEventListener('input', function(e) {
+                const value = e.target.value;
+                if (value.length > 16) {
+                    e.target.value = value.substring(0, 16);
+                }
+            });
+
+            endInput.addEventListener('keypress', function(e) {
+                const char = String.fromCharCode(e.keyCode || e.which);
+                if (!/[\d\-:T]/.test(char)) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        // Show/hide "Other Issue" input
+        function toggleOtherIssue() {
+            if (issueTypeSelect && issueTypeSelect.value === "Other") {
+                otherIssueWrapper.style.display = "block";
+                if (otherIssueInput) otherIssueInput.required = true;
+            } else {
+                otherIssueWrapper.style.display = "none";
+                if (otherIssueInput) {
+                    otherIssueInput.required = false;
+                    otherIssueInput.value = "";
+                }
+            }
+        }
+
+        if (issueTypeSelect) {
+            issueTypeSelect.addEventListener('change', toggleOtherIssue);
+            toggleOtherIssue(); // Initialize on load
+        }
+
+        // Update color text when color picker changes
+        if (colorInput && colorText) {
+            colorInput.addEventListener('input', function() {
+                colorText.textContent = this.value;
+            });
+        }
+
+        // Validate form before submission to handle past appointments
+        const form = document.getElementById('createAppointmentForm');
+        if (form) {
+            const originalSubmitHandler = form.onsubmit;
+            form.addEventListener('submit', function(e) {
+                // Check if appointment is in the past
+                const startTimeValue = startInput ? startInput.value : '';
+                if (startTimeValue) {
+                    const startDate = new Date(startTimeValue);
+                    const now = new Date();
+
+                    // If appointment is in the past, we'll let it create but it will go to past appointments
+                    // The server-side validation will handle marking it appropriately
+                    if (startDate < now) {
+                        console.log('Creating past appointment - will be marked appropriately');
+                    }
+                }
+            });
+        }
+    });
+
+    // Also initialize when modal is shown (for AJAX loading)
+    setTimeout(function() {
+        const startInput = document.getElementById('startTimeInput');
+        const endInput = document.getElementById('endTimeInput');
+
+        if (startInput && endInput && !endInput.value && startInput.value) {
+            const startDate = new Date(startInput.value);
+            if (!isNaN(startDate)) {
+                let endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+                if (endDate.getHours() >= 17) {
+                    endDate = new Date(startDate);
+                    endDate.setHours(17, 0, 0, 0);
+                }
+                // Format the date properly for the input
+                const formattedDate = formatDateTimeForInput(endDate);
+                endInput.value = formattedDate;
+            }
+        }
+
+        // Helper function to format date for input
+        function formatDateTimeForInput(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+    }, 100);
+</script>

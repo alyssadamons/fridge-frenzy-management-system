@@ -1,0 +1,105 @@
+﻿@model E_Commerce.Areas.Identity.ViewModels.RescheduleAppointmentViewModel
+@{
+    ViewData["Title"] = "Reschedule Appointment";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="fas fa-calendar-alt"></i> Reschedule Appointment</h4>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle"></i> @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="RescheduleAppointment" method="post" id="rescheduleForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.AppointmentId" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Current Issue Type</label>
+                            <input type="text" class="form-control" value="@Model.IssueType" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PreferredDateTime" class="form-label">New Preferred Date & Time *</label>
+                            <input asp-for="PreferredDateTime" type="datetime-local" class="form-control"
+                                   id="preferredDateTime" required
+                                   min="@DateTime.Now.AddDays(1).ToString("yyyy-MM-ddTHH:mm")" />
+                            <small class="form-text text-muted">
+                                Available: Monday - Saturday, 8:00 AM - 4:00 PM (No same-day bookings)
+                            </small>
+                            <span asp-validation-for="PreferredDateTime" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label">Additional Notes (Optional)</label>
+                            <textarea asp-for="Notes" class="form-control" rows="4"
+                                      placeholder="Any additional information or changes..."></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Note:</strong> You can only reschedule appointments that are still awaiting technician assignment.
+                            Once a technician is assigned, please contact support for changes.
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="@Url.Action("MyAppointments")" class="btn btn-secondary me-md-2">Cancel</a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-calendar-check"></i> Reschedule Appointment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const preferredDateTime = document.getElementById('preferredDateTime');
+
+            function setMinDateTime() {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(8, 0, 0, 0);
+
+                if (tomorrow.getDay() === 0) { // Sunday
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                }
+
+                const minDate = tomorrow.toISOString().slice(0, 16);
+                preferredDateTime.min = minDate;
+            }
+
+            setMinDateTime();
+
+            @if (Model.Status == "Incomplete")
+            {
+                    <text>
+                    console.log('Appointment is incomplete');
+                    </text>
+            }
+        });
+    </script>
+}

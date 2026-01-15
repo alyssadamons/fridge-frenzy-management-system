@@ -1,0 +1,171 @@
+﻿@model E_Commerce.Areas.Dashboard.Models.Employee
+
+<div class="modal-header bg-success text-white">
+    <h5 class="modal-title">
+        <i class="fas fa-user-plus"></i> Add New Employee
+    </h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body">
+    <form id="createEmployeeForm"
+          asp-action="CreateModal"
+          asp-controller="Employee"
+          asp-area="Dashboard"
+          method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label asp-for="FirstName" class="form-label">First Name *</label>
+                    <input asp-for="FirstName" class="form-control" placeholder="e.g. John" required />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label asp-for="LastName" class="form-label">Last Name *</label>
+                    <input asp-for="LastName" class="form-control" placeholder="e.g. Smith" required />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="ContactNumber" class="form-label">Contact Number *</label>
+            <input asp-for="ContactNumber" class="form-control" placeholder="0812345678" maxlength="10" pattern="^0\d{9}$" required />
+            <span asp-validation-for="ContactNumber" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Position" class="form-label">Position *</label>
+            <select asp-for="Position" class="form-control" required>
+                <option value="">Select Position</option>
+                <option value="Technician">Technician</option>
+                <option value="Sales">Sales Representative</option>
+                <option value="CustomerManager">Customer Manager</option>
+            </select>
+            <span asp-validation-for="Position" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="JobTitle" class="form-label">Job Title *</label>
+            <input asp-for="JobTitle" class="form-control" placeholder="e.g. Senior Technician" required />
+            <span asp-validation-for="JobTitle" class="text-danger"></span>
+        </div>
+
+        <!-- Add any other required fields from your Employee model -->
+        <div class="mb-3">
+            <label asp-for="Department" class="form-label">Department *</label>
+            <input asp-for="Department" class="form-control" value="General" required />
+            <span asp-validation-for="Department" class="text-danger"></span>
+        </div>
+
+        <!-- Auto-generated credentials preview -->
+        <div class="alert alert-info">
+            <h6><i class="fas fa-key"></i> Auto-generated Login Credentials</h6>
+            <div class="row mt-2">
+                <div class="col-md-6">
+                    <strong>Email:</strong>
+                    <div class="text-muted" id="generatedEmail">Will be generated automatically</div>
+                </div>
+                <div class="col-md-6">
+                    <strong>Password:</strong>
+                    <div class="text-muted" id="generatedPassword">Will be generated automatically</div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="button" class="btn btn-success" onclick="submitModalForm(document.getElementById('createEmployeeForm'))">
+        <i class="fas fa-save"></i> Create Employee
+    </button>
+</div>
+
+<script>
+    // Wait for the content to be inserted into the modal
+    setTimeout(function() {
+        console.log('Employee create modal content loaded');
+
+           function updateCredentialPreview() {
+        const firstName = document.getElementById('FirstName')?.value.trim();
+        const lastName = document.getElementById('LastName')?.value.trim();
+        const position = document.getElementById('Position')?.value;
+
+        console.log('Updating credentials:', { firstName, lastName, position });
+
+        if (firstName && lastName && position) {
+            // Remove spaces and special characters from email parts
+            const cleanFirstName = firstName.toLowerCase().replace(/\s+/g, '');
+            const cleanLastName = lastName.toLowerCase().replace(/\s+/g, '');
+            const email = `${cleanFirstName}.${cleanLastName}@@fridgefrenzy.com`;
+
+            // IMPROVED PASSWORD GENERATION - Matches your Identity requirements
+            let password = '';
+            const firstInitial = firstName[0].toUpperCase();
+            const lastInitial = lastName[0].toUpperCase();
+
+            if (position === 'Technician') {
+                password = `${firstInitial}${lastInitial}Tech2024!`;
+            } else if (position === 'Sales') {
+                password = `${firstInitial}${lastInitial}Sales2024!`;
+            } else if (position === 'CustomerManager') {
+                password = `${firstInitial}${lastInitial}Manager2024!`;
+            }
+
+            const emailEl = document.getElementById('generatedEmail');
+            const passwordEl = document.getElementById('generatedPassword');
+
+            if (emailEl) {
+                emailEl.textContent = email;
+                emailEl.className = 'text-success fw-bold';
+            }
+            if (passwordEl) {
+                passwordEl.textContent = password;
+                passwordEl.className = 'text-success fw-bold';
+            }
+
+            console.log('Generated credentials:', { email, password });
+        } else {
+            const emailEl = document.getElementById('generatedEmail');
+            const passwordEl = document.getElementById('generatedPassword');
+
+            if (emailEl) {
+                emailEl.textContent = 'Will be generated automatically';
+                emailEl.className = 'text-muted';
+            }
+            if (passwordEl) {
+                passwordEl.textContent = 'Will be generated automatically';
+                passwordEl.className = 'text-muted';
+            }
+        }
+    }
+}
+
+        // Attach event listeners for credential preview
+        const firstNameInput = document.getElementById('FirstName');
+        const lastNameInput = document.getElementById('LastName');
+        const positionSelect = document.getElementById('Position');
+
+        if (firstNameInput) {
+            firstNameInput.addEventListener('input', updateCredentialPreview);
+            console.log('Attached FirstName listener');
+        }
+        if (lastNameInput) {
+            lastNameInput.addEventListener('input', updateCredentialPreview);
+            console.log('Attached LastName listener');
+        }
+        if (positionSelect) {
+            positionSelect.addEventListener('change', updateCredentialPreview);
+            console.log('Attached Position listener');
+        }
+
+        // Initial update
+        updateCredentialPreview();
+
+    }, 100);
+</script>

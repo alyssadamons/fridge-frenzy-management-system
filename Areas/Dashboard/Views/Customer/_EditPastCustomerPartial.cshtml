@@ -1,0 +1,269 @@
+﻿@model E_Commerce.Areas.Dashboard.Models.Customer
+
+<div class="modal-header bg-warning text-dark">
+    <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Inactive Customer</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <div id="alertContainer"></div>
+
+    <form id="editPastCustomerForm" asp-action="EditPastCustomer" method="post" asp-controller="Customer" asp-area="Dashboard">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="CustomerID" />
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Company Name</label>
+            <input asp-for="Name" class="form-control" autocomplete="organization" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Owner" class="form-label">Owner Name</label>
+            <input asp-for="Owner" class="form-control" autocomplete="name" />
+            <span asp-validation-for="Owner" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="ContactNumber" class="form-label">Phone Number</label>
+            <input asp-for="ContactNumber" class="form-control" maxlength="10" autocomplete="tel" />
+            <span asp-validation-for="ContactNumber" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label">Email</label>
+            <input asp-for="Email" class="form-control" autocomplete="email" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label asp-for="StreetNumber" class="form-label">Street Number</label>
+                <input asp-for="StreetNumber" class="form-control" autocomplete="address-line1" />
+                <span asp-validation-for="StreetNumber" class="text-danger"></span>
+            </div>
+            <div class="col-md-5 mb-3">
+                <label asp-for="StreetName" class="form-label">Street Name</label>
+                <input asp-for="StreetName" class="form-control" autocomplete="address-line1" />
+                <span asp-validation-for="StreetName" class="text-danger"></span>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="Suburb" class="form-label">Suburb</label>
+                <input asp-for="Suburb" class="form-control" autocomplete="address-level2" />
+                <span asp-validation-for="Suburb" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label asp-for="City" class="form-label">City</label>
+                <input asp-for="City" class="form-control" autocomplete="address-level1" />
+                <span asp-validation-for="City" class="text-danger"></span>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label asp-for="PostalCode" class="form-label">Postal Code</label>
+                <input asp-for="PostalCode" class="form-control" maxlength="4" autocomplete="postal-code" />
+                <span asp-validation-for="PostalCode" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Notes" class="form-label">Notes</label>
+            <textarea asp-for="Notes" class="form-control" rows="3" autocomplete="off"></textarea>
+        </div>
+
+        <!-- SIMPLIFIED Password Reset Section -->
+        <div class="card border-warning mb-4">
+            <div class="card-header bg-warning bg-opacity-10">
+                <h6 class="mb-0"><i class="fas fa-key me-2"></i>Password Reset</h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning mb-3">
+                    <small>
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        <strong>Warning:</strong> This will reset the customer's password immediately.
+                    </small>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="resetPasswordCheckbox"
+                           onchange="togglePasswordFieldPast()" name="resetPassword" value="true" autocomplete="off">
+                    <label class="form-check-label" for="resetPasswordCheckbox">
+                        <strong>Reset user password</strong>
+                    </label>
+                </div>
+
+                <!-- Password Input Field - Hidden by default -->
+                <div id="passwordField" style="display: none;">
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password *</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="newPassword" name="newPassword"
+                                   placeholder="Enter new password (min 6 characters)" oninput="validatePasswordPast()">
+                            <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibilityPast('newPassword', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div id="newPasswordError" class="text-danger small mt-1"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm Password *</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
+                                   placeholder="Confirm new password" oninput="validatePasswordPast()">
+                            <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibilityPast('confirmPassword', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div id="confirmPasswordError" class="text-danger small mt-1"></div>
+                    </div>
+
+                    <div id="passwordMatch" class="form-text"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-info">
+            <small>
+                <i class="fas fa-info-circle"></i>
+                This customer is currently inactive. You can update their information and then restore them to active status from the Inactive Customers page.
+            </small>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="button" class="btn btn-warning" onclick="submitEditPastCustomer()">
+        <i class="fas fa-save"></i> Update Customer
+    </button>
+</div>
+
+<script>
+    // SIMPLE FUNCTIONS FOR PAST CUSTOMER
+    function togglePasswordFieldPast() {
+        console.log('togglePasswordFieldPast called');
+        var checkbox = document.getElementById('resetPasswordCheckbox');
+        var passwordField = document.getElementById('passwordField');
+
+        if (checkbox && passwordField) {
+            if (checkbox.checked) {
+                passwordField.style.display = 'block';
+                console.log('Password field shown for past customer');
+            } else {
+                passwordField.style.display = 'none';
+                console.log('Password field hidden for past customer');
+            }
+        }
+    }
+
+    function togglePasswordVisibilityPast(fieldId, button) {
+        var input = document.getElementById(fieldId);
+        var icon = button.querySelector('i');
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fas fa-eye';
+        }
+    }
+
+    function validatePasswordPast() {
+        var newPassword = document.getElementById('newPassword') ? document.getElementById('newPassword').value : '';
+        var confirmPassword = document.getElementById('confirmPassword') ? document.getElementById('confirmPassword').value : '';
+        var passwordMatch = document.getElementById('passwordMatch');
+        var newPasswordError = document.getElementById('newPasswordError');
+        var confirmPasswordError = document.getElementById('confirmPasswordError');
+
+        if (newPasswordError) newPasswordError.textContent = '';
+        if (confirmPasswordError) confirmPasswordError.textContent = '';
+
+        if (newPassword.length > 0 && newPassword.length < 6) {
+            if (newPasswordError) newPasswordError.textContent = 'Password must be at least 6 characters';
+        }
+
+        if (passwordMatch) {
+            if (confirmPassword === '') {
+                passwordMatch.textContent = '';
+            } else if (newPassword === confirmPassword && newPassword.length >= 6) {
+                passwordMatch.textContent = '✓ Passwords match';
+                passwordMatch.className = 'form-text text-success';
+            } else {
+                passwordMatch.textContent = '✗ Passwords do not match';
+                passwordMatch.className = 'form-text text-danger';
+                if (confirmPasswordError) confirmPasswordError.textContent = 'Passwords do not match';
+            }
+        }
+    }
+
+    function submitEditPastCustomer() {
+        var checkbox = document.getElementById('resetPasswordCheckbox');
+        if (checkbox && checkbox.checked) {
+            var newPassword = document.getElementById('newPassword') ? document.getElementById('newPassword').value : '';
+            var confirmPassword = document.getElementById('confirmPassword') ? document.getElementById('confirmPassword').value : '';
+
+            if (newPassword.length < 6) {
+                showAlertPast('Password must be at least 6 characters', 'danger');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showAlertPast('Passwords do not match', 'danger');
+                return;
+            }
+        }
+
+        var form = document.getElementById('editPastCustomerForm');
+        var submitBtn = event.target;
+        var originalText = submitBtn.innerHTML;
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+
+        var formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'RequestVerificationToken': formData.get('__RequestVerificationToken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var message = data.message || 'Customer updated successfully!';
+                if (data.tempPassword) {
+                    message += '<br><strong>New Password:</strong> ' + data.tempPassword;
+                }
+                showAlertPast(message, 'success');
+
+                setTimeout(() => {
+                    var modal = bootstrap.Modal.getInstance(document.querySelector('.modal'));
+                    modal.hide();
+                    location.reload();
+                }, 3000);
+            } else {
+                showAlertPast(data.error || 'An error occurred', 'danger');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            showAlertPast('A server error occurred', 'danger');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    }
+
+    function showAlertPast(message, type) {
+        var alertContainer = document.getElementById('alertContainer');
+        var alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        alertContainer.innerHTML = '<div class="alert ' + alertClass + ' alert-dismissible fade show">' + message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+    }
+
+    console.log('Past customer modal script loaded');
+</script>

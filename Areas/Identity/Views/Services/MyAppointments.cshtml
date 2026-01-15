@@ -1,0 +1,234 @@
+﻿@model List<E_Commerce.Areas.Dashboard.Models.Appointment>
+@{
+    ViewData["Title"] = "My Appointments";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var upcoming = Model?.Where(a => a.Status != "Cancelled" && !a.IsDeleted && a.StartTime >= DateTime.Now && (a.Status == "Pending" || a.Status == "Incomplete" || a.Status == "Rescheduled" || a.Status == "Scheduled")).OrderBy(a => a.StartTime).ToList();
+    var past = Model?.Where(a => a.IsDeleted || a.EndTime < DateTime.Now || a.Status == "Completed" || a.Status == "Cancelled").OrderByDescending(a => a.StartTime).ToList();
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-history"></i> My Appointments</h1>
+                <a href="@Url.Action("BookAppointment")" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Book New Appointment
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-12">
+            <!-- Upcoming Appointments -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-check"></i> Upcoming Appointments</h5>
+                </div>
+                <div class="card-body">
+                    @if (upcoming?.Any() == true)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date & Time</th>
+                                        <th>Fridge</th>
+                                        <th>Issue Type</th>
+                                        <th>Technician</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var appointment in upcoming)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@appointment.StartTime.ToString("ddd, MMM dd, yyyy")</strong><br>
+                                                <small>@appointment.StartTime.ToString("h:mm tt") - @appointment.EndTime.ToString("h:mm tt")</small>
+                                            </td>
+                                            <td>
+                                                @if (appointment.Fridge != null)
+                                                {
+                                                    <strong>@appointment.Fridge.FridgeName</strong>
+                                                    @if (!string.IsNullOrEmpty(appointment.Fridge.Brand))
+                                                    {
+                                                        <br>
+                                                        <small class="text-muted">@appointment.Fridge.Brand</small>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Not specified</span>
+                                                }
+                                            </td>
+                                            <td>@appointment.IssueType</td>
+                                            <td>
+                                                @if (appointment.Employee != null)
+                                                {
+                                                    @($"{appointment.Employee.FirstName} {appointment.Employee.LastName}")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Not assigned yet</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge @GetStatusBadgeClass(appointment.Status)">@appointment.Status</span>
+                                                @if (appointment.Status == "Incomplete")
+                                                {
+                                                    <br>
+                                                    <small class="text-muted">Awaiting admin review</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    @if (appointment.Status != "Completed")
+                                                    {
+                                                        <a href="@Url.Action("EditAppointment", "Services", new { area = "Identity", id = appointment.Id })"
+                                                           class="btn btn-outline-primary me-1" title="Edit Appointment">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        
+                                                        <form asp-action="CancelAppointment" method="post" class="d-inline">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="id" value="@appointment.Id" />
+                                                            <button type="submit" class="btn btn-outline-danger"
+                                                                    title="Cancel Appointment"
+                                                                    onclick="return confirm('Are you sure you want to cancel this appointment?@(appointment.Status != "Incomplete" ? " The assigned technician will be notified." : "")')">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">Completed - No actions</span>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No upcoming appointments found.</p>
+                            <a href="@Url.Action("BookAppointment")" class="btn btn-primary">Book Your Appointment</a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Past Appointments -->
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-history"></i> Past Appointments</h5>
+                </div>
+                <div class="card-body">
+                    @if (past?.Any() == true)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date & Time</th>
+                                        <th>Issue Type</th>
+                                        <th>Technician</th>
+                                        <th>Status</th>
+                                        <th>Technician Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var appointment in past)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@appointment.StartTime.ToString("ddd, MMM dd, yyyy")</strong><br>
+                                                <small>@appointment.StartTime.ToString("h:mm tt") - @appointment.EndTime.ToString("h:mm tt")</small>
+                                            </td>
+                                            <td>@appointment.IssueType</td>
+                                            <td>
+                                                @if (appointment.Employee != null)
+                                                {
+                                                    @($"{appointment.Employee.FirstName} {appointment.Employee.LastName}")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Not assigned</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge @GetStatusBadgeClass(appointment.Status)">
+                                                    @(appointment.IsDeleted ? "Cancelled" : appointment.Status)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(appointment.TechnicianFaults))
+                                                {
+                                                    <small class="text-muted">@appointment.TechnicianFaults</small>
+                                                }
+                                                else if (!string.IsNullOrEmpty(appointment.Notes))
+                                                {
+                                                    <small class="text-muted">@appointment.Notes</small>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No past appointments found.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "Pending" => "bg-warning",
+            "Completed" => "bg-success",
+            "Incomplete" => "bg-danger",
+            "Rescheduled" => "bg-info",
+            "Scheduled" => "bg-primary",
+            "Cancelled" => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+}

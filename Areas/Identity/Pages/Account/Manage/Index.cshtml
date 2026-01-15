@@ -1,0 +1,122 @@
+﻿@page
+@model E_Commerce.Areas.Identity.Pages.Account.Manage.IndexModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Profile";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-3 mb-4">
+            <partial name="_ManageNav" />
+        </div>
+        <div class="col-lg-9">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i>@ViewData["Title"]</h4>
+                </div>
+                <div class="card-body p-4">
+                    <partial name="_StatusMessage" for="StatusMessage" />
+
+                    <form id="profile-form" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="row">
+                            <!-- Business Information -->
+                            <div class="col-md-6">
+                                <h5 class="text-primary mb-3 pb-2 border-bottom">Business Information</h5>
+
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Input.Owner" class="form-control" placeholder="Owner Name" />
+                                    <label asp-for="Input.Owner" class="form-label">Owner Name</label>
+                                    <span asp-validation-for="Input.Owner" class="text-danger small"></span>
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Input.CompanyName" class="form-control" placeholder="Company Name" />
+                                    <label asp-for="Input.CompanyName" class="form-label">Company Name</label>
+                                    <span asp-validation-for="Input.CompanyName" class="text-danger small"></span>
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Input.ContactNumber" class="form-control" placeholder="Contact Number" />
+                                    <label asp-for="Input.ContactNumber" class="form-label">Contact Number</label>
+                                    <span asp-validation-for="Input.ContactNumber" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <!-- Address Information -->
+                            <div class="col-md-6">
+                                <h5 class="text-primary mb-3 pb-2 border-bottom">Address Information</h5>
+
+                                <div class="form-floating mb-3">
+                                    <div class="col-6">
+                                        <div class="form-floating">
+                                            <input asp-for="Input.StreetNumber" class="form-control" placeholder="Street Number" />
+                                            <label asp-for="Input.StreetNumber" class="form-label">Street No.</label>
+                                            <span asp-validation-for="Input.StreetNumber" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-floating">
+                                            <input asp-for="Input.StreetName" class="form-control" placeholder="Street Name" />
+                                            <label asp-for="Input.StreetName" class="form-label">Street Name</label>
+                                            <span asp-validation-for="Input.StreetName" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Input.Suburb" class="form-control" placeholder="Suburb" />
+                                    <label asp-for="Input.Suburb" class="form-label">Suburb</label>
+                                    <span asp-validation-for="Input.Suburb" class="text-danger small"></span>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-8">
+                                        <div class="form-floating">
+                                            <input asp-for="Input.City" class="form-control" placeholder="City" />
+                                            <label asp-for="Input.City" class="form-label">City</label>
+                                            <span asp-validation-for="Input.City" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="form-floating">
+                                            <input asp-for="Input.PostalCode" class="form-control" placeholder="Postal Code" />
+                                            <label asp-for="Input.PostalCode" class="form-label">Postal Code</label>
+                                            <span asp-validation-for="Input.PostalCode" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-3 pb-2 border-bottom">Additional Notes</h5>
+                            <div class="form-floating">
+                                <textarea asp-for="Input.Notes" class="form-control" placeholder="Notes" style="height: 100px"></textarea>
+                                <label asp-for="Input.Notes" class="form-label">Notes</label>
+                                <span asp-validation-for="Input.Notes" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                            <a asp-page="/Index" asp-area="" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

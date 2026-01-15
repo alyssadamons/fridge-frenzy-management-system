@@ -1,0 +1,468 @@
+﻿@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* --- Modernized login layout to match Register page --- */
+    .login-card {
+        max-width: 900px;
+        margin: 3rem auto;
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.1);
+    }
+
+    .login-header {
+        background: linear-gradient(90deg, #0d6efd, #3b82f6);
+        color: #fff;
+        border-radius: 1rem 1rem 0 0;
+        text-align: center;
+        padding: 2rem 1rem;
+    }
+
+        .login-header h3 {
+            font-weight: 700;
+        }
+
+    .form-label {
+        font-weight: 600;
+    }
+
+    .form-control {
+        border-radius: 0.5rem;
+        border: 1px solid #ccc;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+        .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.15);
+        }
+
+    .password-toggle {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: transparent;
+        color: #888;
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+
+        .password-toggle:hover {
+            color: #0d6efd;
+        }
+
+    .btn-primary {
+        border-radius: 0.75rem;
+        font-size: 1.1rem;
+        padding: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+    .alert {
+        border-radius: 0.75rem;
+    }
+
+    .login-links a {
+        color: #0d6efd;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+        .login-links a:hover {
+            text-decoration: underline;
+        }
+
+    .login-links {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .login-body {
+        background: #fafafa;
+        border-radius: 0 0 1rem 1rem;
+        padding: 3rem;
+    }
+
+    .error-shake {
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @@keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    .attempts-warning {
+        background: linear-gradient(135deg, #fff3cd, #ffecb5);
+        border: 1px solid #ffc107;
+        color: #856404;
+    }
+
+    .account-locked {
+        background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        border: 1px solid #dc3545;
+        color: #721c24;
+    }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .input-error {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220,53,69,0.15) !important;
+    }
+
+    .input-success {
+        border-color: #198754 !important;
+        box-shadow: 0 0 0 0.2rem rgba(25,135,84,0.15) !important;
+    }
+
+    @@media (max-width: 768px) {
+        .login-body {
+            padding: 2rem;
+        }
+
+        .login-links {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+            .login-links span {
+                display: none;
+            }
+    }
+</style>
+
+<div class="card login-card">
+    <div class="login-header">
+        <h3><i class="fas fa-sign-in-alt me-2"></i>Welcome Back</h3>
+        <p class="mb-0 mt-2 opacity-75">Sign in to your Fridge Frenzy account</p>
+    </div>
+
+    <div class="login-body">
+        <!-- Custom Alert Container -->
+        <div id="customAlertContainer"></div>
+
+        <form asp-route-returnUrl="@Model.ReturnUrl" method="post" id="loginForm">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="row g-4">
+                <div class="col-md-6 mx-auto">
+                    <label asp-for="Input.Email" class="form-label">Email Address</label>
+                    <input asp-for="Input.Email" class="form-control" id="emailInput" placeholder="Enter your email" autocomplete="email" />
+                    <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6 mx-auto">
+                    <label asp-for="Input.Password" class="form-label">Password</label>
+                    <div class="position-relative">
+                        <input asp-for="Input.Password" class="form-control pe-5" id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password" />
+                        <button type="button" id="toggleLoginPassword" class="password-toggle">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                </div>
+            </div>
+
+           
+
+            <button type="submit" class="btn btn-primary w-100 fw-semibold" id="loginButton">
+                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+            </button>
+        </form>
+
+        <div class="login-links">
+            <a asp-area="Identity" asp-page="/Account/Register" asp-route-returnUrl="@Model.ReturnUrl" class="text-decoration-none">
+                <i class="fas fa-user-plus me-1"></i>Create Account
+            </a>
+            <span class="text-muted">|</span>
+            <a asp-area="Identity" asp-page="/Account/ForgotPassword" class="text-decoration-none">
+                <i class="fas fa-key me-1"></i>Forgot Password?
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginForm = document.getElementById("loginForm");
+            const loginButton = document.getElementById("loginButton");
+            const emailInput = document.getElementById("emailInput");
+            const loginPasswordInput = document.getElementById("loginPassword");
+            const toggleLoginPassword = document.getElementById("toggleLoginPassword");
+            const customAlertContainer = document.getElementById("customAlertContainer");
+
+            let loginAttempts = 0;
+            const maxAttempts = 5;
+            let lockoutTime = null;
+
+            // Check for existing lockout
+            const storedLockout = sessionStorage.getItem('loginLockout');
+            if (storedLockout) {
+                lockoutTime = parseInt(storedLockout);
+                const now = Date.now();
+                if (now < lockoutTime) {
+                    showLockoutMessage(lockoutTime);
+                } else {
+                    sessionStorage.removeItem('loginLockout');
+                    sessionStorage.removeItem('loginAttempts');
+                }
+            }
+
+            // Check for stored attempts
+            const storedAttempts = sessionStorage.getItem('loginAttempts');
+            if (storedAttempts) {
+                loginAttempts = parseInt(storedAttempts);
+                if (loginAttempts >= 2) {
+                    showAttemptsWarning(loginAttempts);
+                }
+            }
+
+            // Password visibility toggle
+            if (toggleLoginPassword && loginPasswordInput) {
+                toggleLoginPassword.addEventListener("click", function () {
+                    const type = loginPasswordInput.type === "password" ? "text" : "password";
+                    loginPasswordInput.type = type;
+                    const icon = toggleLoginPassword.querySelector('i');
+                    if (icon) {
+                        icon.className = type === "password" ? "fas fa-eye" : "fas fa-eye-slash";
+                    }
+                });
+            }
+
+            // Enhanced form submission - ONLY validate, don't prevent default for successful cases
+            loginForm.addEventListener("submit", function (e) {
+                // Check if locked out
+                if (lockoutTime && Date.now() < lockoutTime) {
+                    e.preventDefault();
+                    showLockoutMessage(lockoutTime);
+                    return;
+                }
+
+                // Validate form - if invalid, prevent submission
+                if (!validateForm()) {
+                    e.preventDefault();
+                    return;
+                }
+
+                // If validation passes, allow normal form submission but show loading state
+                setLoadingState(true);
+                
+                // The form will submit normally and ASP.NET will handle the redirect
+                // We don't prevent default here for successful cases
+            });
+
+            function validateForm() {
+                const email = emailInput.value.trim();
+                const password = loginPasswordInput.value.trim();
+                let isValid = true;
+
+                // Clear previous visual feedback
+                emailInput.classList.remove('input-error', 'input-success');
+                loginPasswordInput.classList.remove('input-error', 'input-success');
+
+                // Validate email
+                const emailRegex = /^[^\s]+[^\s]+\.[^\s]+$/;
+                if (!email) {
+                    emailInput.classList.add('input-error');
+                    showAlert('Please enter your email address.', 'warning');
+                    isValid = false;
+                } else if (!emailRegex.test(email)) {
+                    emailInput.classList.add('input-error');
+                    showAlert('Please enter a valid email address.', 'warning');
+                    isValid = false;
+                } else {
+                    emailInput.classList.add('input-success');
+                }
+
+                // Validate password
+                if (!password) {
+                    loginPasswordInput.classList.add('input-error');
+                    if (isValid) showAlert('Please enter your password.', 'warning');
+                    isValid = false;
+                } else {
+                    loginPasswordInput.classList.add('input-success');
+                }
+
+                return isValid;
+            }
+
+            function showLockoutMessage(lockoutUntil) {
+                const remainingTime = Math.ceil((lockoutUntil - Date.now()) / 60000); // minutes
+                const message = `Too many failed attempts. Please try again in ${remainingTime} minute(s) or reset your password.`;
+                showAlert(message, 'danger');
+                loginButton.disabled = true;
+                
+                // Update button text
+                loginButton.innerHTML = `<i class="fas fa-lock me-2"></i>Account Temporarily Locked`;
+                
+                // Enable button after lockout period
+                setTimeout(() => {
+                    sessionStorage.removeItem('loginLockout');
+                    sessionStorage.removeItem('loginAttempts');
+                    loginButton.disabled = false;
+                    loginButton.innerHTML = `<i class="fas fa-sign-in-alt me-2"></i>Sign In`;
+                    showAlert('You may now attempt to login again.', 'info');
+                }, lockoutUntil - Date.now());
+            }
+
+            function showAttemptsWarning(attempts) {
+                const remaining = maxAttempts - attempts;
+                const message = `You have ${remaining} login attempt(s) remaining before temporary lockout.`;
+                showAlert(message, 'warning', true);
+            }
+
+            function showAlert(message, type, showIcon = true) {
+                const alertClass = {
+                    'success': 'alert-success',
+                    'danger': 'alert-danger',
+                    'warning': 'alert-warning attempts-warning',
+                    'info': 'alert-info'
+                }[type] || 'alert-info';
+
+                const iconClass = {
+                    'success': 'fa-check-circle',
+                    'danger': 'fa-exclamation-triangle',
+                    'warning': 'fa-exclamation-circle',
+                    'info': 'fa-info-circle'
+                }[type] || 'fa-info-circle';
+
+                const html = `
+                    <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                        ${showIcon ? `<i class="fas ${iconClass} me-2"></i>` : ''}
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+
+                customAlertContainer.innerHTML = html;
+                
+                // Auto-dismiss success/info messages after 5 seconds
+                if (type === 'success' || type === 'info') {
+                    setTimeout(() => {
+                        const alert = customAlertContainer.querySelector('.alert');
+                        if (alert) {
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, 5000);
+                }
+            }
+
+            function addShakeEffect() {
+                loginForm.classList.add('error-shake');
+                setTimeout(() => {
+                    loginForm.classList.remove('error-shake');
+                }, 500);
+            }
+
+            function setLoadingState(loading) {
+                if (loading) {
+                    loginButton.disabled = true;
+                    loginButton.innerHTML = `<span class="loading-spinner me-2"></span>Signing In...`;
+                } else {
+                    loginButton.disabled = false;
+                    loginButton.innerHTML = `<i class="fas fa-sign-in-alt me-2"></i>Sign In`;
+                }
+            }
+
+            // Real-time validation
+            emailInput.addEventListener('blur', validateForm);
+            loginPasswordInput.addEventListener('blur', validateForm);
+
+            // Clear validation on focus
+            [emailInput, loginPasswordInput].forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.classList.remove('input-error', 'input-success');
+                });
+            });
+
+            // Check for return URL from cart checkout
+            const urlParams = new URLSearchParams(window.location.search);
+            const returnUrl = urlParams.get('returnUrl');
+            if (returnUrl && returnUrl.includes('/Cart/Checkout')) {
+                sessionStorage.setItem('loginReturnUrl', returnUrl);
+                showAlert('Please login to complete your checkout.', 'info');
+            }
+
+            // Auto-focus email field
+            emailInput.focus();
+
+            // Handle failed login attempts from server-side
+            // Check if there are validation errors shown (indicating failed login)
+            setTimeout(() => {
+                const validationErrors = document.querySelectorAll('.text-danger');
+                const hasServerErrors = Array.from(validationErrors).some(error => error.textContent.trim() !== '');
+                
+                if (hasServerErrors) {
+                    loginAttempts++;
+                    sessionStorage.setItem('loginAttempts', loginAttempts.toString());
+                    
+                    if (loginAttempts >= maxAttempts) {
+                        lockoutTime = Date.now() + (15 * 60 * 1000); // 15 minutes lockout
+                        sessionStorage.setItem('loginLockout', lockoutTime.toString());
+                        showLockoutMessage(lockoutTime);
+                    } else if (loginAttempts >= 3) {
+                        showAlert(`Invalid login attempt. (Attempt ${loginAttempts} of ${maxAttempts})`, 'danger', true);
+                        addShakeEffect();
+                    } else {
+                        showAlert('Invalid email or password. Please try again.', 'danger');
+                        addShakeEffect();
+                    }
+                    
+                    setLoadingState(false);
+                }
+            }, 100);
+        });
+    </script>
+}

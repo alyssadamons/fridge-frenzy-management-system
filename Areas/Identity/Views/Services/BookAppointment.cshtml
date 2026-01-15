@@ -1,0 +1,498 @@
+﻿@model E_Commerce.Areas.Identity.ViewModels.AppointmentWithFridgeViewModel
+@{
+    ViewData["Title"] = "Book Maintenance Appointment";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="appointment-booking-wrapper">
+    <div class="container py-3">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+
+                <!-- Page Header -->
+                <div class="text-center mb-3">
+                    <div class="appointment-icon-wrapper mb-2">
+                        <i class="fas fa-calendar-plus"></i>
+                    </div>
+                    <h2 class="h4 fw-bold mb-1">Book Maintenance Appointment</h2>
+                    <p class="text-muted small">Schedule professional fridge service at your convenience</p>
+                </div>
+
+                <!-- Main Card -->
+                <div class="appointment-card shadow-sm">
+                    <div class="card-body p-3">
+
+                        <!-- Alerts -->
+                        <div id="alertContainer" class="mb-3">
+                            @if (TempData["Error"] != null)
+                            {
+                                <div class="alert alert-danger alert-dismissible fade show py-2">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    @TempData["Error"]
+                                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+                                </div>
+                            }
+                            @if (TempData["Success"] != null)
+                            {
+                                <div class="alert alert-success alert-dismissible fade show py-2">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    @TempData["Success"]
+                                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+                                </div>
+                            }
+                        </div>
+
+                        <form id="appointmentForm" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <!-- STEP 1: FRIDGE SELECTION -->
+                            <div class="form-section mb-3">
+                                <div class="section-header mb-2">
+                                    <span class="step-badge">1</span>
+                                    <div>
+                                        <h5 class="section-title mb-0">Select Your Fridge</h5>
+                                        <p class="section-subtitle">Choose which fridge needs service</p>
+                                    </div>
+                                </div>
+
+                                @if (Model.CustomerFridges != null && Model.CustomerFridges.Any())
+                                {
+                                    <div class="registered-fridges mb-2">
+                                        @foreach (var fridge in Model.CustomerFridges)
+                                        {
+                                            <label class="fridge-card" for="fridge_@fridge.Id">
+                                                <input class="fridge-radio" type="radio"
+                                                       name="SelectedFridgeId" value="@fridge.Id"
+                                                       id="fridge_@fridge.Id"
+                                                       @(Model.SelectedFridgeId == fridge.Id ? "checked" : "")>
+                                                <div class="fridge-card-content">
+                                                    <div class="fridge-icon">
+                                                        <i class="fas fa-refrigerator"></i>
+                                                    </div>
+                                                    <div class="fridge-details">
+                                                        <h6 class="fridge-name">@fridge.FridgeName</h6>
+                                                        @if (!string.IsNullOrEmpty(fridge.Brand))
+                                                        {
+                                                            <span class="fridge-meta">@fridge.Brand</span>
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(fridge.SerialNumber))
+                                                        {
+                                                            <span class="fridge-meta">SN: @fridge.SerialNumber</span>
+                                                        }
+                                                    </div>
+                                                    <div class="fridge-checkmark">
+                                                        <i class="fas fa-check-circle"></i>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        }
+                                    </div>
+
+                                    <div class="divider-wrapper mb-2">
+                                        <div class="divider-line"></div>
+
+                                    </div>
+                                }
+
+
+
+                                <!-- STEP 2: SERVICE DETAILS -->
+                                <div class="form-section mb-3">
+                                    <div class="section-header mb-2">
+                                        <span class="step-badge">2</span>
+                                        <div>
+                                            <h5 class="section-title mb-0">Service Details</h5>
+                                            <p class="section-subtitle">Tell us what needs to be fixed</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-2">
+                                        <div class="col-12">
+                                            <label for="IssueType" class="form-label small fw-semibold">Issue Type <span class="text-danger">*</span></label>
+                                            <select class="form-select form-select-sm" id="IssueType" name="IssueType" required>
+                                                <option value="">Select issue type...</option>
+                                                <option>Compressor Repair</option>
+                                                <option>Gas Refill / Refrigerant Leak</option>
+                                                <option>Thermostat Replacement</option>
+                                                <option>Door Seal / Gasket Replacement</option>
+                                                <option>Electrical Fault</option>
+                                                <option>Fan Motor Repair</option>
+                                                <option>Water Leakage</option>
+                                                <option>Ice Maker Fault</option>
+                                                <option>General Service / Cleaning</option>
+                                                <option>Temperature Control Issue</option>
+                                                <option>Other</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-12" id="otherIssueWrapper" style="display:none;">
+                                            <label for="OtherIssue" class="form-label small fw-semibold">Describe Issue <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control form-control-sm" id="OtherIssue" name="OtherIssue"
+                                                   placeholder="Please describe the issue..." value="@Model.OtherIssue">
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label for="PreferredDateTime" class="form-label small fw-semibold">Preferred Date & Time <span class="text-danger">*</span></label>
+                                            <input type="datetime-local" class="form-control form-control-sm" id="PreferredDateTime"
+                                                   name="PreferredDateTime"
+                                                   value="@Model.PreferredDateTime.ToString("yyyy-MM-ddTHH:mm")"
+                                                   min="@DateTime.Now.AddDays(1).ToString("yyyy-MM-ddTHH:mm")" required>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label for="Notes" class="form-label small fw-semibold">Additional Notes <span class="text-muted">(Optional)</span></label>
+                                            <textarea class="form-control form-control-sm" id="Notes" name="Notes" rows="2"
+                                                      placeholder="Any special instructions or additional details...">@Model.Notes</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- INFO BOX -->
+                                <div class="info-box mb-3">
+                                    <div class="info-box-header">
+                                        <i class="fas fa-lightbulb me-2"></i>
+                                        <strong class="small">Booking Information</strong>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-6">
+                                            <ul class="info-list">
+                                                <li><i class="fas fa-check-circle text-success me-1 small"></i>Book at least 1 day in advance</li>
+                                                <li><i class="fas fa-check-circle text-success me-1 small"></i>Service hours: Monday–Saturday</li>
+                                                <li><i class="fas fa-check-circle text-success me-1 small"></i>Available times: 8:00 AM–4:00 PM</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <ul class="info-list">
+                                                <li><i class="fas fa-check-circle text-success me-1 small"></i>Confirmation sent after booking</li>
+                                                <li><i class="fas fa-check-circle text-success me-1 small"></i>Free rescheduling before assignment</li>
+                                                <li><i class="fas fa-check-circle text-success me-1 small"></i>Status updates via email & dashboard</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ACTION BUTTONS -->
+                                <div class="action-buttons">
+                                    <a href="@Url.Action("Index", "Services", new { area = "Identity" })"
+                                       class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-arrow-left me-1"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary btn-sm" id="submitButton">
+                                        <i class="fas fa-calendar-check me-1"></i>Book Appointment
+                                    </button>
+                                </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#IssueType').val('@Model.IssueType');
+
+            // Show/hide Other issue field
+            $('#IssueType').change(function () {
+                const isOther = $(this).val() === 'Other';
+                $('#otherIssueWrapper').toggle(isOther);
+                $('#OtherIssue').prop('required', isOther);
+            }).trigger('change');
+
+            // Fridge radio selection handling
+            $('.fridge-radio').change(function () {
+                $('.fridge-card').removeClass('selected');
+                $('.other-fridge-option').removeClass('selected');
+
+                if ($(this).val() === "0") {
+                    $('.other-fridge-option').addClass('selected');
+                    $('#otherFridgeWrapper').slideDown(300);
+                } else {
+                    $(this).closest('.fridge-card').addClass('selected');
+                    $('#otherFridgeWrapper').slideUp(300);
+                }
+            });
+
+            // Trigger on page load
+            $('.fridge-radio:checked').trigger('change');
+
+            // Set minimum datetime (tomorrow 8AM)
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(8, 0, 0, 0);
+            if (tomorrow.getDay() === 0) tomorrow.setDate(tomorrow.getDate() + 1);
+            $('#PreferredDateTime').attr('min', tomorrow.toISOString().slice(0, 16));
+
+            // AJAX form submission
+            $('#appointmentForm').on('submit', function (e) {
+                e.preventDefault();
+                const $btn = $('#submitButton');
+                const $alert = $('#alertContainer');
+
+                $alert.empty();
+                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Booking...');
+
+                $.ajax({
+                    url: '@Url.Action("BookAppointment", "Services", new { area = "Identity" })',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            $alert.html(`
+                                <div class="alert alert-success alert-dismissible fade show py-2">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    ${response.message}
+                                </div>
+                            `);
+                            setTimeout(() => {
+                                window.location.href = response.redirectUrl || '@Url.Action("MyAppointments", "Services", new { area = "Identity" })';
+                            }, 1500);
+                        } else {
+                            $alert.html(`
+                                <div class="alert alert-danger alert-dismissible fade show py-2">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    ${response.message}
+                                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+                                </div>
+                            `);
+                            $btn.prop('disabled', false).html('<i class="fas fa-calendar-check me-1"></i>Book Appointment');
+                        }
+                    },
+                    error: function () {
+                        $alert.html(`
+                            <div class="alert alert-danger alert-dismissible fade show py-2">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Failed to book appointment. Please try again.
+                                <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+                            </div>
+                        `);
+                        $btn.prop('disabled', false).html('<i class="fas fa-calendar-check me-1"></i>Book Appointment');
+                    }
+                });
+            });
+        });
+    </script>
+
+    <style>
+        /* Subtle styling enhancements */
+        .appointment-booking-wrapper {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+
+        .appointment-card {
+            border: none;
+            border-radius: 12px;
+            background: white;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .appointment-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+            }
+
+        .appointment-icon-wrapper {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+            .appointment-icon-wrapper i {
+                font-size: 1.5rem;
+                color: white;
+            }
+
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: #0d6efd;
+            color: white;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .section-title {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .section-subtitle {
+            color: #6c757d;
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        .fridge-card {
+            display: block;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+            .fridge-card:hover {
+                border-color: #0d6efd;
+                background: #f8f9fe;
+            }
+
+            .fridge-card.selected {
+                border-color: #0d6efd;
+                background: #f0f4ff;
+            }
+
+        .fridge-radio {
+            display: none;
+        }
+
+        .fridge-card-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .fridge-icon {
+            width: 40px;
+            height: 40px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0d6efd;
+        }
+
+        .fridge-details {
+            flex: 1;
+        }
+
+        .fridge-name {
+            color: #2c3e50;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+            font-size: 0.95rem;
+        }
+
+        .fridge-meta {
+            display: block;
+            color: #6c757d;
+            font-size: 0.8rem;
+        }
+
+        .fridge-checkmark {
+            color: #28a745;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .fridge-card.selected .fridge-checkmark {
+            opacity: 1;
+        }
+
+        .divider-line {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, #e9ecef 50%, transparent 100%);
+            margin: 16px 0;
+        }
+
+        .info-box {
+            background: #f8f9fe;
+            border: 1px solid #e3f2fd;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .info-box-header {
+            color: #0d6efd;
+            font-size: 0.9rem;
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+            .info-list li {
+                padding: 4px 0;
+                font-size: 0.85rem;
+                color: #495057;
+            }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            padding-top: 16px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .form-control-sm, .form-select-sm {
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .form-control-sm:focus, .form-select-sm:focus {
+                border-color: #0d6efd;
+                box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
+            }
+
+        .btn-sm {
+            border-radius: 6px;
+            padding: 6px 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .alert {
+            border-radius: 8px;
+            border: none;
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 576px) {
+            .appointment-card .card-body {
+                padding: 1.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .fridge-card-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 8px;
+            }
+
+            .fridge-checkmark {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+            }
+        }
+    </style>
+}

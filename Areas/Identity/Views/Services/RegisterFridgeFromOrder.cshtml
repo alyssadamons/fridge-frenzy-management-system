@@ -1,0 +1,225 @@
+﻿@model E_Commerce.Areas.Identity.ViewModels.FridgeRegistrationViewModel
+@{
+    ViewData["Title"] = "Register Fridges from Order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var order = ViewBag.Order as E_Commerce.Models.Order;
+    var orderItems = ViewBag.OrderItems as List<E_Commerce.Models.OrderItem>;
+    var registeredFridges = ViewBag.RegisteredFridges as List<E_Commerce.Models.FridgeRegistration> ?? new List<E_Commerce.Models.FridgeRegistration>();
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-refrigerator"></i> Register Fridges from Order</h4>
+                </div>
+                <div class="card-body">
+                    <nav aria-label="breadcrumb" class="mb-4">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="@Url.Action("MyFridges", "Services", new { area = "Identity" })">My Fridges</a></li>
+                            <li class="breadcrumb-item"><a href="@Url.Action("OrderHistory", "Cart", new { area = "" })">Order History</a></li>
+                            <li class="breadcrumb-item active">Register Fridges</li>
+                        </ol>
+                    </nav>
+
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle"></i> @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["Warning"] != null)
+                    {
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i> @TempData["Warning"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <!-- Order Information -->
+                    @if (order != null)
+                    {
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle"></i> Order Information</h6>
+                            <p class="mb-1"><strong>Order #:</strong> @order.Id</p>
+                            <p class="mb-1"><strong>Order Date:</strong> @order.OrderDate.ToString("dd MMM yyyy")</p>
+                            <p class="mb-0"><strong>Total Items:</strong> @order.OrderItems.Count</p>
+                        </div>
+                    }
+
+                    @if (orderItems != null && orderItems.Any())
+                    {
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-3">Select Fridges to Register</h5>
+                            <p class="text-muted mb-4">Click "Register Fridge" for each refrigerator product you want to add to your registered fridges.</p>
+
+                            @foreach (var item in orderItems)
+                            {
+                                var isAlreadyRegistered = registeredFridges.Any(f => f.OrderId == order.Id && f.ProductId == item.ProductId && f.IsActive);
+
+                                <div class="card mb-3 @(isAlreadyRegistered ? "border-warning" : "border-success")">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-8">
+                                                @if (isAlreadyRegistered)
+                                                {
+                                                    <span class="badge bg-warning float-end">
+                                                        <i class="fas fa-check-circle me-1"></i>Already Registered
+                                                    </span>
+                                                }
+                                                <h6 class="card-title @(isAlreadyRegistered ? "text-warning" : "text-success")">@item.Product.Name</h6>
+                                                @if (!string.IsNullOrEmpty(item.Product.Description))
+                                                {
+                                                    <p class="card-text text-muted small">@item.Product.Description</p>
+                                                }
+                                                <div class="text-muted small">
+                                                    <strong>Quantity:</strong> @item.Quantity •
+                                                    <strong>Price:</strong> R @item.Price.ToString("N2")
+                                                </div>
+                                                @if (isAlreadyRegistered)
+                                                {
+                                                    var registeredFridge = registeredFridges.FirstOrDefault(f => f.OrderId == order.Id && f.ProductId == item.ProductId && f.IsActive);
+                                                    if (registeredFridge != null)
+                                                    {
+                                                        <div class="mt-2">
+                                                            <small class="text-warning">
+                                                                <i class="fas fa-info-circle me-1"></i>
+                                                                Registered as: <strong>@registeredFridge.FridgeName</strong>
+                                                                on @registeredFridge.RegistrationDate.ToString("dd MMM yyyy")
+                                                            </small>
+                                                        </div>
+                                                    }
+                                                }
+                                            </div>
+                                            <div class="col-md-4 text-end">
+                                                @if (isAlreadyRegistered)
+                                                {
+                                                    <div class="d-grid">
+                                                        <button type="button" class="btn btn-warning btn-lg" disabled>
+                                                            <i class="fas fa-check-circle me-2"></i> Already Registered
+                                                        </button>
+                                                        <small class="text-muted mt-1">This fridge is already in your registered list</small>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <!-- FIXED: Use name attributes instead of asp-for -->
+                                                    <form asp-action="RegisterFridgeFromOrder" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="OrderId" value="@order.Id" />
+                                                        <input type="hidden" name="ProductId" value="@item.ProductId" />
+                                                        <input type="hidden" name="OrderItemId" value="@item.Id" />
+                                                        <input type="hidden" name="FridgeName" value="@item.Product.Name" />
+                                                        <input type="hidden" name="Brand" value="Fridge Frenzy" />
+                                                        <input type="hidden" name="PurchaseDate" value="@order.OrderDate.ToString("yyyy-MM-dd")" />
+
+                                                        <button type="submit" class="btn btn-success btn-lg">
+                                                            <i class="fas fa-refrigerator me-2"></i> Register Fridge
+                                                        </button>
+                                                    </form>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Summary Section -->
+                        <div class="alert alert-light border">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <h5 class="text-primary">@orderItems.Count</h5>
+                                    <small class="text-muted">Total Products</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5 class="text-success">@(orderItems.Count - registeredFridges.Count(f => f.OrderId == order.Id))</h5>
+                                    <small class="text-muted">Available to Register</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5 class="text-warning">@registeredFridges.Count(f => f.OrderId == order.Id)</h5>
+                                    <small class="text-muted">Already Registered</small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning text-center py-4">
+                            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                            <h5>No Refrigerator Products Found</h5>
+                            <p class="mb-3">This order doesn't contain any refrigerator products that can be registered for service tracking.</p>
+                            <div class="mt-3">
+                                <a href="@Url.Action("MyFridges", "Services", new { area = "Identity" })" class="btn btn-primary me-2">
+                                    <i class="fas fa-refrigerator me-1"></i> View My Fridges
+                                </a>
+                                <a href="@Url.Action("BookAppointment", "Services", new { area = "Identity" })" class="btn btn-outline-primary">
+                                    <i class="fas fa-plus me-1"></i> Register New Fridge
+                                </a>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="@Url.Action("OrderHistory", "Cart", new { area = "" })" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-arrow-left me-1"></i> Back to Orders
+                        </a>
+                        <a href="@Url.Action("MyFridges", "Services", new { area = "Identity" })" class="btn btn-outline-primary">
+                            <i class="fas fa-refrigerator me-1"></i> My Fridges
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            console.log('RegisterFridgeFromOrder page loaded successfully');
+
+            // Simple loading state - ONLY change button text, don't prevent form submission
+            $('form').on('submit', function() {
+                console.log('Form submitted - adding loading state');
+                var button = $(this).find('button[type="submit"]');
+                var originalText = button.html();
+
+                // Store original text in data attribute for potential recovery
+                button.data('original-text', originalText);
+
+                // Show loading state but DON'T prevent form submission
+                button.prop('disabled', true);
+                button.html('<i class="fas fa-spinner fa-spin me-2"></i> Registering...');
+
+                // Let the form submit normally - the page will reload/redirect
+            });
+
+            
+
+            // Debug: Check if forms are working
+            console.log('Found ' + $('form').length + ' forms on the page');
+        });
+
+        // Fallback function in case something goes wrong
+        function restoreButton(buttonId) {
+            var button = $('#' + buttonId);
+            var originalText = button.data('original-text');
+            if (originalText) {
+                button.prop('disabled', false);
+                button.html(originalText);
+            }
+        }
+    </script>
+}

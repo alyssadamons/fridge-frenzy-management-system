@@ -1,0 +1,266 @@
+﻿@model E_Commerce.Areas.Dashboard.Models.Appointment
+
+<div class="modal-header bg-warning text-dark">
+    <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Past Appointment</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            @ViewBag.Error
+        </div>
+    }
+    else
+    {
+        <form id="editPastAppointmentForm" asp-action="EditPastAppointment" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div class="mb-3">
+                <label asp-for="CustomerID" class="form-label">Customer *</label>
+                <select asp-for="CustomerID" class="form-select" required
+                        asp-items="@(new SelectList(ViewBag.Customers ?? new List<object>(), "CustomerID", "Name", Model.CustomerID))">
+                    <option value="">-- Select Customer --</option>
+                </select>
+                <span asp-validation-for="CustomerID" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="EmployeeID" class="form-label">Technician *</label>
+                <select asp-for="EmployeeID" class="form-select" required
+                        asp-items="@(new SelectList(ViewBag.Technicians ?? new List<object>(), "EmployeeID", "FullName", Model.EmployeeID))">
+                    <option value="">-- Select Technician --</option>
+                </select>
+                <span asp-validation-for="EmployeeID" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="StartTime" class="form-label">Start Time *</label>
+                    <input asp-for="StartTime" type="datetime-local" class="form-control" required
+                           value="@Model.StartTime.ToString("yyyy-MM-ddTHH:mm")" />
+                    <span asp-validation-for="StartTime" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="EndTime" class="form-label">End Time *</label>
+                    <input asp-for="EndTime" type="datetime-local" class="form-control" required
+                           value="@Model.EndTime.ToString("yyyy-MM-ddTHH:mm")" />
+                    <span asp-validation-for="EndTime" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="IssueType" class="form-label">Issue Type *</label>
+                <select asp-for="IssueType" class="form-select" id="issueTypeSelect" required>
+                    <option value="">-- Select Issue Type --</option>
+                    <option value="Compressor Repair">Compressor Repair</option>
+                    <option value="Gas Refill / Refrigerant Leak">Gas Refill / Refrigerant Leak</option>
+                    <option value="Thermostat Replacement">Thermostat Replacement</option>
+                    <option value="Door Seal / Gasket Replacement">Door Seal / Gasket Replacement</option>
+                    <option value="Electrical Fault">Electrical Fault</option>
+                    <option value="Fan Motor Repair">Fan Motor Repair</option>
+                    <option value="Water Leakage">Water Leakage</option>
+                    <option value="Ice Maker Fault">Ice Maker Fault</option>
+                    <option value="General Service / Cleaning">General Service / Cleaning</option>
+                    <option value="Temperature Control Issue">Temperature Control Issue</option>
+                    <option value="Other">Other</option>
+                </select>
+                <span asp-validation-for="IssueType" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3" id="otherIssueWrapper" style="display:@(Model.IssueType == "Other" ? "block" : "none");">
+                <label asp-for="OtherIssue" class="form-label">Please specify issue</label>
+                <input asp-for="OtherIssue" class="form-control" id="otherIssueInput" />
+                <span asp-validation-for="OtherIssue" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Notes" class="form-label">Notes</label>
+                <textarea asp-for="Notes" class="form-control" rows="3">@Model.Notes</textarea>
+                <span asp-validation-for="Notes" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="TechnicianFaults" class="form-label">Technician Feedback</label>
+                <textarea asp-for="TechnicianFaults" class="form-control" rows="3">@Model.TechnicianFaults</textarea>
+                <span asp-validation-for="TechnicianFaults" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Status" class="form-label">Status *</label>
+                <select asp-for="Status" class="form-select" required>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                    <option value="No Show">No Show</option>
+                    <option value="Rescheduled">Rescheduled</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Incomplete">Incomplete</option>
+                </select>
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Color" class="form-label">Event Color</label>
+                <div class="input-group">
+                    <input asp-for="Color" type="color" class="form-control form-control-color"
+                           value="@(string.IsNullOrEmpty(Model.Color) ? "#3788d8" : Model.Color)" />
+                    <span class="input-group-text" id="colorText">@(string.IsNullOrEmpty(Model.Color) ? "#3788d8" : Model.Color)</span>
+                </div>
+            </div>
+        </form>
+    }
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    @if (ViewBag.Error == null)
+    {
+        <button type="button" class="btn btn-warning" onclick="submitModalForm(document.getElementById('editPastAppointmentForm'))">
+            <i class="fas fa-save"></i> Update Appointment
+        </button>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Show/hide "Other Issue" input
+        function toggleOtherIssue() {
+            const issueTypeSelect = document.getElementById("issueTypeSelect");
+            const otherIssueWrapper = document.getElementById("otherIssueWrapper");
+            const otherIssueInput = document.getElementById("otherIssueInput");
+
+            if (issueTypeSelect && issueTypeSelect.value === "Other") {
+                otherIssueWrapper.style.display = "block";
+                if (otherIssueInput) otherIssueInput.required = true;
+            } else {
+                otherIssueWrapper.style.display = "none";
+                if (otherIssueInput) {
+                    otherIssueInput.required = false;
+                    otherIssueInput.value = "";
+                }
+            }
+        }
+
+        // Initialize when modal loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set the selected issue type
+            const issueTypeSelect = document.getElementById("issueTypeSelect");
+            if (issueTypeSelect) {
+                issueTypeSelect.value = '@Model.IssueType';
+                issueTypeSelect.addEventListener("change", toggleOtherIssue);
+                toggleOtherIssue();
+            }
+
+            // Update color text when color picker changes
+            const colorInput = document.querySelector('input[type="color"]');
+            const colorText = document.getElementById('colorText');
+            if (colorInput && colorText) {
+                colorInput.addEventListener('input', function() {
+                    colorText.textContent = this.value;
+                });
+            }
+        });
+
+        // Enhanced form submission
+        function submitModalForm(form) {
+            const formData = new FormData(form);
+            const submitButton = form.closest('.modal-footer').querySelector('button[type="button"]');
+            const originalText = submitButton.innerHTML;
+
+            // Disable submit button to prevent double submission
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Success - close modal and reload page
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('ajaxModal'));
+                    modal.hide();
+
+                    // Show success message
+                    showToast('Success', data.message || 'Appointment updated successfully!', 'success');
+
+                    // Reload the page after a short delay
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    // Show error message
+                    const errorMessage = data.error || (data.errors ? data.errors.join(', ') : 'Failed to update appointment');
+                    showToast('Error', errorMessage, 'error');
+
+                    // Re-enable button
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting form:', error);
+                showToast('Error', 'An error occurred while saving. Please try again.', 'error');
+
+                // Re-enable button
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalText;
+            });
+
+            return false;
+        }
+
+        function showToast(title, message, type) {
+            // Create toast notification
+            const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+            const toastId = 'toast-' + Date.now();
+
+            const toastHtml = `
+                <div id="${toastId}" class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <strong>${title}:</strong> ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+
+            // Show the toast
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+
+            // Remove toast from DOM after it hides
+            toastElement.addEventListener('hidden.bs.toast', function () {
+                this.remove();
+            });
+        }
+
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.className = 'toast-container position-fixed top-0 end-0 p-3';
+            container.style.zIndex = '9999';
+            document.body.appendChild(container);
+            return container;
+        }
+    </script>
+}

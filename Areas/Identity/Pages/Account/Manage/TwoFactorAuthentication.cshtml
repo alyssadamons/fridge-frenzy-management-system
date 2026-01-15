@@ -1,0 +1,127 @@
+﻿@page
+@using Microsoft.AspNetCore.Http.Features
+@model TwoFactorAuthenticationModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Two-factor authentication (2FA)";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-3 mb-4">
+            <partial name="_ManageNav" />
+        </div>
+        <div class="col-lg-9">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0"><i class="fas fa-shield-alt me-2"></i>@ViewData["Title"]</h4>
+                </div>
+                <div class="card-body p-4">
+                    <partial name="_StatusMessage" for="StatusMessage" />
+
+                    @{
+                        var consentFeature = HttpContext.Features.Get<ITrackingConsentFeature>();
+                        if (consentFeature?.CanTrack ?? true)
+                        {
+                            if (Model.Is2faEnabled)
+                            {
+                                <!-- Recovery Codes Status -->
+                                <div class="mb-4">
+                                    <h5 class="text-primary mb-3">Recovery Codes Status</h5>
+                                    @if (Model.RecoveryCodesLeft == 0)
+                                    {
+                                        <div class="alert alert-danger d-flex align-items-center">
+                                            <i class="fas fa-exclamation-triangle me-3 fa-2x"></i>
+                                            <div>
+                                                <strong>You have no recovery codes left.</strong>
+                                                <p class="mb-0">You must generate a new set of recovery codes before you can log in with a recovery code.</p>
+                                            </div>
+                                        </div>
+                                    }
+                                    else if (Model.RecoveryCodesLeft == 1)
+                                    {
+                                        <div class="alert alert-danger d-flex align-items-center">
+                                            <i class="fas fa-exclamation-circle me-3 fa-2x"></i>
+                                            <div>
+                                                <strong>You have 1 recovery code left.</strong>
+                                                <p class="mb-0">You should generate a new set of recovery codes.</p>
+                                            </div>
+                                        </div>
+                                    }
+                                    else if (Model.RecoveryCodesLeft <= 3)
+                                    {
+                                        <div class="alert alert-warning d-flex align-items-center">
+                                            <i class="fas fa-exclamation-circle me-3 fa-2x"></i>
+                                            <div>
+                                                <strong>You have @Model.RecoveryCodesLeft recovery codes left.</strong>
+                                                <p class="mb-0">You should generate a new set of recovery codes.</p>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- 2FA Management -->
+                                <div class="mb-4">
+                                    <h5 class="text-primary mb-3">Two-Factor Authentication</h5>
+                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                        @if (Model.IsMachineRemembered)
+                                        {
+                                            <form method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-warning">
+                                                    <i class="fas fa-trash me-2"></i>Forget This Browser
+                                                </button>
+                                            </form>
+                                        }
+                                        <a asp-page="./Disable2fa" class="btn btn-outline-danger">
+                                            <i class="fas fa-ban me-2"></i>Disable 2FA
+                                        </a>
+                                        <a asp-page="./GenerateRecoveryCodes" class="btn btn-outline-primary">
+                                            <i class="fas fa-redo me-2"></i>Reset Recovery Codes
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Authenticator App -->
+                            <div>
+                                <h5 class="text-primary mb-3">Authenticator App</h5>
+                                <div class="d-flex flex-wrap gap-2">
+                                    @if (!Model.HasAuthenticator)
+                                    {
+                                        <a id="enable-authenticator" asp-page="./EnableAuthenticator" class="btn btn-primary">
+                                            <i class="fas fa-plus-circle me-2"></i>Add Authenticator App
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a id="enable-authenticator" asp-page="./EnableAuthenticator" class="btn btn-primary">
+                                            <i class="fas fa-cog me-2"></i>Set Up Authenticator App
+                                        </a>
+                                        <a id="reset-authenticator" asp-page="./ResetAuthenticator" class="btn btn-outline-danger">
+                                            <i class="fas fa-sync-alt me-2"></i>Reset Authenticator App
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-danger d-flex align-items-center">
+                                <i class="fas fa-exclamation-triangle me-3 fa-2x"></i>
+                                <div>
+                                    <strong>Privacy and cookie policy have not been accepted.</strong>
+                                    <p class="mb-0">You must accept the policy before you can enable two factor authentication.</p>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

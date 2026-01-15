@@ -1,0 +1,26 @@
+﻿@page
+@model LogoutModel
+@{
+    ViewData["Title"] = "Log out";
+}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="alert alert-success" data-auto-dismiss>
+                <h4><i class="fas fa-check-circle me-2"></i>You have successfully logged out</h4>
+                <p class="mb-0">Redirecting you to the home page in 5 seconds...</p>
+            </div>
+            <div class="mt-4">
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-primary">Go Home Now</a>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        setTimeout(function() {
+            // Redirect to the main site home page (not dashboard)
+            window.location.href = '@Url.Action("Index", "Home", new { area = "" })';
+        }, 5000);
+    </script>
+}

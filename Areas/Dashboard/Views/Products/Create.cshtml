@@ -1,0 +1,185 @@
+﻿@model E_Commerce.Models.Product
+
+@{
+    ViewData["Title"] = "Create Product";
+    Layout = "~/Areas/Dashboard/Views/Shared/_Layout.cshtml";
+}
+
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="mt-4">Create New Product</h1>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to List
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post" enctype="multipart/form-data" class="row g-4">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <!-- Left Column - Basic Info -->
+                    <div class="col-lg-6">
+                        <div class="mb-4">
+                            <label asp-for="Name" class="form-label fw-semibold">Product Name</label>
+                            <input asp-for="Name" class="form-control form-control-lg" placeholder="Enter product name" />
+                            <span asp-validation-for="Name" class="text-danger small mt-1"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Price" class="form-label fw-semibold">Price (R)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">R</span>
+                                <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" placeholder="0.00" />
+                            </div>
+                            <span asp-validation-for="Price" class="text-danger small mt-1"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="CategoryId" class="form-label fw-semibold">Category</label>
+                            <select asp-for="CategoryId" class="form-select">
+                                <option value="">Select Category</option>
+                                @foreach (var category in ViewBag.Categories)
+                                {
+                                    <option value="@category.Id">@category.Name</option>
+                                }
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger small mt-1"></span>
+                        </div>
+                    </div>
+
+                    <!-- Right Column - Image Section -->
+                    <div class="col-lg-6">
+                        <!-- Image Upload -->
+                        <div class="mb-4">
+                            <label for="ImageFile" class="form-label fw-semibold">Product Image</label>
+                            <input type="file" name="ImageFile" id="ImageFile" class="form-control" required accept="image/*" />
+                            <div class="form-text text-muted">
+                                <small>Required. Max 5MB. Supported: JPG, JPEG, PNG, GIF, WebP</small>
+                            </div>
+                            <span class="text-danger small mt-1" id="imageFileError"></span>
+                        </div>
+
+                        <!-- Image Preview -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Image Preview</label>
+                            <div class="border rounded-3 p-4 bg-light text-center image-preview-container" style="min-height: 200px;">
+                                <div class="d-flex align-items-center justify-content-center h-100">
+                                    <div class="text-muted">
+                                        <i class="fas fa-image fa-3x mb-2 d-block"></i>
+                                        <small>Image preview will appear here</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image Info -->
+                        <div class="alert alert-info border-0">
+                            <div class="d-flex">
+                                <i class="fas fa-info-circle fa-lg me-3 mt-1 text-info"></i>
+                                <div>
+                                    <h6 class="alert-heading mb-2">Image Requirements</h6>
+                                    <ul class="mb-0 small">
+                                        <li>Square or landscape images work best</li>
+                                        <li>Recommended size: 800x600 pixels</li>
+                                        <li>Maximum file size: 5MB</li>
+                                        <li>Supported formats: JPG, PNG, GIF, WebP</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-12">
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label fw-semibold">Product Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="6" placeholder="Enter detailed product description..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger small mt-1"></span>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="col-12">
+                        <div class="d-flex gap-2 pt-3 border-top">
+                            <button type="submit" class="btn btn-success px-4 py-2" id="submitButton">
+                                <i class="fas fa-plus-circle me-2"></i>Create Product
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Image preview functionality
+        document.getElementById('ImageFile').addEventListener('change', function(e) {
+            const previewContainer = document.querySelector('.image-preview-container');
+            const file = e.target.files[0];
+            const errorElement = document.getElementById('imageFileError');
+
+            // Clear previous errors
+            errorElement.textContent = '';
+
+            if (file) {
+                // File type validation
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    errorElement.textContent = 'Please select a valid image file (JPG, JPEG, PNG, GIF, WebP).';
+                    this.value = '';
+                    previewContainer.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 text-muted"><div><i class="fas fa-image fa-3x mb-2 d-block"></i><small>Image preview will appear here</small></div></div>';
+                    return;
+                }
+
+                // File size validation
+                const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+                if (file.size > maxSize) {
+                    errorElement.textContent = 'File size must be less than 5MB.';
+                    this.value = '';
+                    previewContainer.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 text-muted"><div><i class="fas fa-image fa-3x mb-2 d-block"></i><small>Image preview will appear here</small></div></div>';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewContainer.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded-2" style="max-height: 180px;" alt="Preview">`;
+                }
+                reader.onerror = function() {
+                    errorElement.textContent = 'Error reading file. Please try another image.';
+                    previewContainer.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 text-muted"><div><i class="fas fa-image fa-3x mb-2 d-block"></i><small>Image preview will appear here</small></div></div>';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 text-muted"><div><i class="fas fa-image fa-3x mb-2 d-block"></i><small>Image preview will appear here</small></div></div>';
+            }
+        });
+
+        // Price validation
+        document.querySelector('input[name="Price"]').addEventListener('change', function() {
+            if (this.value < 0) {
+                this.value = 0;
+            }
+        });
+
+        // Form submission validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const imageFile = document.getElementById('ImageFile');
+            if (!imageFile.files || !imageFile.files[0]) {
+                e.preventDefault();
+                document.getElementById('imageFileError').textContent = 'Please select an image file.';
+                imageFile.focus();
+            }
+        });
+    </script>
+}

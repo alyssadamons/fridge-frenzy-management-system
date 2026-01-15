@@ -1,0 +1,108 @@
+﻿@model E_Commerce.Areas.Dashboard.Models.Appointment
+
+<div class="modal-header bg-info text-white">
+    <h5 class="modal-title">Appointment Details</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <dl class="row">
+        <dt class="col-sm-4">Service Date & Time</dt>
+        <dd class="col-sm-8">
+            @Model.StartTime.ToString("dddd, MMMM dd, yyyy")<br>
+            <small class="text-muted">@Model.StartTime.ToString("h:mm tt") - @Model.EndTime.ToString("h:mm tt")</small>
+        </dd>
+
+        <dt class="col-sm-4">Fridge</dt>
+        <dd class="col-sm-8">
+            @if (Model.Fridge != null)
+            {
+                <strong>@Model.Fridge.FridgeName</strong>
+            
+                <br>
+                @if (!string.IsNullOrEmpty(Model.Fridge.Brand))
+                {
+                    <span class="text-muted">Brand: @Model.Fridge.Brand</span>
+            
+                    <br>
+                }
+                @if (!string.IsNullOrEmpty(Model.Fridge.SerialNumber))
+                {
+                    <small class="text-muted">Serial: @Model.Fridge.SerialNumber</small>
+                }
+            }
+            else
+            {
+                <span class="text-muted">Not specified</span>
+            }
+        </dd>
+
+        <dt class="col-sm-4">Issue Type</dt>
+        <dd class="col-sm-8">@Model.IssueType</dd>
+
+        @if (!string.IsNullOrEmpty(Model.OtherIssue))
+        {
+            <dt class="col-sm-4">Issue Details</dt>
+            <dd class="col-sm-8">@Model.OtherIssue</dd>
+        }
+
+        <dt class="col-sm-4">Assigned Technician</dt>
+        <dd class="col-sm-8">
+            @if (Model.Employee != null)
+            {
+                @($"{Model.Employee.FirstName} {Model.Employee.LastName}")
+            
+                <br>
+                <small class="text-muted">@Model.Employee.JobTitle</small>
+                @if (!string.IsNullOrEmpty(Model.Employee.ContactNumber))
+                {
+                    <br>
+            
+                    <small class="text-muted">Contact: @Model.Employee.ContactNumber</small>
+                }
+            }
+            else
+            {
+                <span class="text-muted">Awaiting technician assignment</span>
+            }
+        </dd>
+
+        <dt class="col-sm-4">Status</dt>
+        <dd class="col-sm-8">
+            @{
+                string badgeClass = Model.Status switch
+                {
+                    "Completed" => "bg-success",
+                    "Pending" => "bg-warning",
+                    "Incomplete" => "bg-danger",
+                    "Rescheduled" => "bg-info",
+                    "Scheduled" => "bg-primary",
+                    "Cancelled" => "bg-secondary",
+                    _ => "bg-secondary"
+                };
+            }
+            <span class="badge @badgeClass">@Model.Status</span>
+        </dd>
+
+        @if (!string.IsNullOrEmpty(Model.Notes))
+        {
+            <dt class="col-sm-4">Your Notes</dt>
+            <dd class="col-sm-8">@Model.Notes</dd>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.TechnicianFaults))
+        {
+            <dt class="col-sm-4">Technician Report</dt>
+            <dd class="col-sm-8">@Model.TechnicianFaults</dd>
+        }
+    </dl>
+</div>
+
+<div class="modal-footer">
+    @if (Model.Status == "Incomplete")
+    {
+        <a href="@Url.Action("EditAppointment", "Services", new { area = "Identity", id = Model.Id })"
+           class="btn btn-warning me-auto">Edit Appointment</a>
+    }
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+</div>

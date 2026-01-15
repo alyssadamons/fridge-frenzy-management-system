@@ -1,0 +1,185 @@
+﻿@model IEnumerable<E_Commerce.Models.Order>
+
+@{
+    ViewData["Title"] = "Orders";
+    Layout = "~/Areas/Dashboard/Views/Shared/_Layout.cshtml";
+}
+
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Orders Management</h1>
+
+        <!-- Alerts -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show">
+                <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Filters Card - FIXED -->
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-body">
+                <form method="get" class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label for="statusFilter" class="form-label">Status Filter</label>
+                        <select name="statusFilter" class="form-select">
+                            <option value="All" selected='@(ViewBag.StatusFilter == "All")'>All Orders</option>
+                            <option value="Pending" selected='@(ViewBag.StatusFilter == "Pending")'>Pending</option>
+                            <option value="Confirmed" selected='@(ViewBag.StatusFilter == "Confirmed")'>Confirmed</option>
+                            <option value="Processing" selected='@(ViewBag.StatusFilter == "Processing")'>Processing</option>
+                            <option value="Shipped" selected='@(ViewBag.StatusFilter == "Shipped")'>Shipped</option>
+                            <option value="Delivered" selected='@(ViewBag.StatusFilter == "Delivered")'>Delivered</option>
+                            <option value="Cancelled" selected='@(ViewBag.StatusFilter == "Cancelled")'>Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="priceSort" class="form-label">Sort by Price</label>
+                        <select name="priceSort" class="form-select">
+                            <option value="" selected='@(string.IsNullOrEmpty(ViewBag.PriceSort))'>Default (Newest First)</option>
+                            <option value="price_asc" selected='@(ViewBag.PriceSort == "price_asc")'>Price: Low to High</option>
+                            <option value="price_desc" selected='@(ViewBag.PriceSort == "price_desc")'>Price: High to Low</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter me-2"></i>Apply Filters
+                        </button>
+                        <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Clear
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-header bg-light border-0">
+                <i class="fas fa-table me-1"></i>
+                Orders Table
+                <span class="badge bg-primary ms-2">@Model.Count() orders</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="align-middle">Order ID</th>
+                                <th class="align-middle">Customer</th>
+                                <th class="align-middle">Order Date</th>
+                                <th class="align-middle text-end">SubTotal</th>
+                                <th class="align-middle text-end">Delivery Fee</th>
+                                <th class="align-middle text-end">Total</th>
+                                <th class="align-middle">Status</th>
+                                <th class="align-middle text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.Any())
+                            {
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-4">
+                                        <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                        @if (ViewBag.StatusFilter != "All" || !string.IsNullOrEmpty(ViewBag.PriceSort))
+                                        {
+                                            <h5 class="text-muted">No orders found matching your filters</h5>
+                                            <p class="text-muted">Try adjusting your filter criteria</p>
+                                        }
+                                        else
+                                        {
+                                            <h5 class="text-muted">No orders found</h5>
+                                            <p class="text-muted">Orders will appear here when customers place orders</p>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var item in Model)
+                                {
+                                    string rowClass = item.Status switch
+                                    {
+                                        "Delivered" => "table-success",
+                                        "Pending" => "table-warning",
+                                        "Cancelled" => "table-danger",
+                                        "Processing" => "table-info",
+                                        "Shipped" => "table-primary",
+                                        "Confirmed" => "table-secondary",
+                                        _ => ""
+                                    };
+
+                                    <tr class="@rowClass">
+                                        <td class="align-middle">
+                                            <strong>#@item.Id</strong>
+                                        </td>
+                                        <td class="align-middle">
+                                            <div class="fw-semibold">@item.CustomerName</div>
+                                            <small class="text-muted">@item.CustomerPhone</small>
+                                            <br>
+                                            <small class="text-muted">@item.DeliveryAddress</small>
+                                        </td>
+                                        <td class="align-middle">
+                                            <small class="text-muted">@item.OrderDate.ToString("MMM dd, yyyy")</small>
+                                            <br>
+                                            <small>@item.OrderDate.ToString("HH:mm")</small>
+                                        </td>
+                                        <td class="align-middle text-end">@item.SubTotal.ToString("C", new System.Globalization.CultureInfo("en-ZA"))</td>
+                                        <td class="align-middle text-end">@item.DeliveryFee.ToString("C", new System.Globalization.CultureInfo("en-ZA"))</td>
+                                        <td class="align-middle text-end fw-bold">@item.Total.ToString("C", new System.Globalization.CultureInfo("en-ZA"))</td>
+                                        <td class="align-middle">
+                                            @{
+                                                string badgeClass = item.Status switch
+                                                {
+                                                    "Delivered" => "bg-success",
+                                                    "Pending" => "bg-warning",
+                                                    "Cancelled" => "bg-danger",
+                                                    "Processing" => "bg-info",
+                                                    "Shipped" => "bg-primary",
+                                                    "Confirmed" => "bg-secondary",
+                                                    _ => "bg-dark"
+                                                };
+                                            }
+                                            <span class="badge @badgeClass">@item.Status</span>
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            <div class="btn-group" role="group">
+                                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info btn-sm" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-warning btn-sm" title="Edit Order">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm" title="Delete Order">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    .table > :not(caption) > * > * {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .btn-group .btn {
+        margin: 0 2px;
+    }
+</style>
