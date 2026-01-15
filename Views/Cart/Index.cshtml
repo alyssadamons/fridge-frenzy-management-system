@@ -1,0 +1,415 @@
+﻿@model List<Cart>
+@{
+    ViewData["Title"] = "Shopping Cart";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="row">
+        <!-- Cart Section -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Shopping Cart</h4>
+                        <span class="badge bg-primary rounded-pill">@Model.Sum(x => x.Qty) items</span>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    @if (!Model.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-shopping-cart fa-4x text-muted mb-4"></i>
+                            <h4 class="text-muted mb-3">Your cart is empty</h4>
+                            <p class="text-muted mb-4">Discover amazing products and start shopping today!</p>
+                            <a href="@Url.Action("Index", "Purchasing")" class="btn btn-primary btn-lg">
+                                <i class="fas fa-shopping-bag me-2"></i>Start Shopping
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var cartItem in Model)
+                        {
+                            <div class="cart-item p-4">
+                                <div class="row align-items-center">
+                                    <!-- Product Image -->
+                                    <div class="col-md-2 col-3">
+                                        <img src="@Url.Content($"~{cartItem.Product.Image}")" class="img-fluid rounded shadow-sm" alt="@cartItem.Product.Name"
+                                             style="height: 100px; width: 100%; object-fit: cover;"
+                                             onerror="this.onerror=null; this.src='https://via.placeholder.com/100x100?text=Image+Not+Found';" />
+                                    </div>
+
+                                    <!-- Product Info -->
+                                    <div class="col-md-4 col-5">
+                                        <h6 class="mb-2 fw-bold text-dark">@cartItem.Product.Name</h6>
+                                        <small class="text-primary fw-semibold">R @cartItem.Product.Price.ToString("N2") each</small>
+                                    </div>
+
+                                    <!-- Quantity Controls - MADE SMALLER -->
+                                    <div class="quantity-controls">
+                                        <a href="@Url.Action("UpdateQuantity", new { cartId = cartItem.Id, quantity = cartItem.Qty - 1 })"
+                                           class="quantity-btn minus-btn">
+                                            -
+                                        </a>
+                                        <span class="quantity-display">@cartItem.Qty</span>
+                                        <a href="@Url.Action("UpdateQuantity", new { cartId = cartItem.Id, quantity = cartItem.Qty + 1 })"
+                                           class="quantity-btn plus-btn">
+                                            +
+                                        </a>
+                                    </div>
+
+                                    <!-- Price and Actions -->
+                                    <div class="col-md-2 col-12 mt-3 mt-md-0">
+                                        <div class="d-flex flex-column align-items-md-end align-items-center">
+                                            <h6 class="text-primary mb-2 fw-bold">R @((cartItem.Product.Price * cartItem.Qty).ToString("N2"))</h6>
+                                            <a href="@Url.Action("RemoveFromCart", new { cartId = cartItem.Id })"
+                                               class="btn btn-outline-danger btn-sm remove-btn"
+                                               onclick="return confirm('Remove this item from cart?');"
+                                               title="Remove item">
+                                                <i class="fas fa-times me-1"></i>Remove
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Divider -->
+                            @if (cartItem != Model.Last())
+                            {
+                                <hr class="my-0 mx-4">
+                            }
+                        }
+                    }
+                </div>
+
+                @if (Model.Any())
+                {
+                    <div class="card-footer bg-white py-3">
+                        <a href="@Url.Action("Index", "Purchasing")" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="summary-row">
+                        <span class="text-muted">Subtotal (@Model.Sum(x => x.Qty) items)</span>
+                        <span class="fw-bold">R @Model.Sum(x => x.Qty * x.Product.Price).ToString("N2")</span>
+                    </div>
+
+                    @if (Model.Any())
+                    {
+                        <div class="summary-row mt-2">
+                            <small class="text-info">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Choose delivery option at checkout
+                            </small>
+                        </div>
+
+                        <hr class="my-3">
+
+                        <div class="summary-row mb-4">
+                            <span class="h5 mb-0 text-dark">Total Amount</span>
+                            <span class="h5 mb-0 text-success fw-bold">R @((Model.Sum(x => x.Qty * x.Product.Price)).ToString("N2"))</span>
+                        </div>
+
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <a href="@Url.Action("Checkout")" class="btn btn-success btn-lg w-100 mb-2 py-3">
+                                <i class="fas fa-lock me-2"></i>Proceed to Checkout
+                            </a>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info py-3 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <div>
+                                        <small class="fw-medium">Please <a href="/Identity/Account/Login" class="alert-link fw-bold">login</a> to checkout</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="/Identity/Account/Login" class="btn btn-primary btn-lg w-100 py-3">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login to Checkout
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <div class="summary-row">
+                            <span class="text-muted">Delivery Fee</span>
+                            <span class="fw-bold">R 0.00</span>
+                        </div>
+
+                        <hr class="my-3">
+
+                        <div class="summary-row mb-4">
+                            <span class="h5 mb-0">Total</span>
+                            <span class="h5 mb-0 text-muted">R 0.00</span>
+                        </div>
+
+                        <button class="btn btn-secondary btn-lg w-100 py-3" disabled>
+                            <i class="fas fa-shopping-cart me-2"></i>Checkout
+                        </button>
+                    }
+                </div>
+
+                @if (Model.Any())
+                {
+                    <div class="card-footer bg-light text-center py-3">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="fas fa-shield-alt text-success me-2"></i>
+                            <small class="text-muted fw-medium">Secure checkout guaranteed</small>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .cart-item {
+        transition: background-color 0.2s ease;
+    }
+
+        .cart-item:hover {
+            background-color: #f8f9fa;
+        }
+
+    .quantity-controls {
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        margin: 0 20px;
+        background: white;
+        overflow: hidden;
+        width: 120px; /* Fixed width to prevent stretching */
+    }
+
+    .quantity-btn {
+        background: transparent;
+        color: #6c757d;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        font-weight: bold;
+        padding: 0;
+        height: 100%;
+        width: 20px;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+        .quantity-btn:hover {
+            background-color: #f8f9fa;
+            color: #495057;
+        }
+
+    .quantity-display {
+        min-width: 40px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #495057;
+        flex-grow: 1;
+    }
+
+    /* Mobile responsive adjustments */
+    @@media (max-width: 768px) {
+        .quantity-controls
+
+    {
+        height: 32px;
+        width: 110px;
+        margin: 0 15px;
+    }
+
+    .quantity-btn {
+        width: 32px;
+        font-size: 0.9rem;
+    }
+
+    .quantity-display {
+        min-width: 35px;
+        font-size: 0.9rem;
+    }
+
+    }
+
+    @@media (max-width: 576px) {
+        .quantity-controls
+
+    {
+        height: 30px;
+        width: 100px;
+        margin: 0 10px;
+    }
+
+    .quantity-btn {
+        width: 30px;
+        font-size: 0.85rem;
+    }
+
+    .quantity-display {
+        min-width: 30px;
+        font-size: 0.85rem;
+    }
+
+    }
+
+    
+
+    .remove-btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+        .remove-btn:hover {
+            background-color: #dc3545;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding: 0 4px;
+    }
+
+    .card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        border-bottom: 1px solid #e9ecef;
+        border-radius: 16px 16px 0 0 !important;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    }
+
+    .card-footer {
+        border-top: 1px solid #e9ecef;
+        border-radius: 0 0 16px 16px !important;
+    }
+
+    .btn-lg {
+        padding: 16px 24px;
+        font-weight: 600;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-lg:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+    .badge {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+        border-radius: 20px;
+    }
+
+    .sticky-top {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    /* Mobile Responsive */
+    @@media (max-width: 768px) {
+        .cart-item {
+            padding: 16px;
+        }
+
+            .cart-item .row > div {
+                margin-bottom: 12px;
+            }
+
+        .quantity-controls {
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .sticky-top {
+            position: relative !important;
+            top: 0 !important;
+            margin-top: 20px;
+        }
+
+        .remove-btn {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+        }
+
+        .btn-lg {
+            padding: 14px 20px;
+        }
+
+        .col-md-4.col-7 {
+            margin-bottom: 0 !important;
+        }
+        /* Even smaller quantity counter on mobile */
+        .quantity-btn {
+            width: 26px !important;
+            height: 26px !important;
+            font-size: 0.65rem !important;
+        }
+
+        .quantity-value {
+            font-size: 0.85rem !important;
+            min-width: 25px !important;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .cart-item .row > div {
+            margin-bottom: 12px;
+        }
+
+        .quantity-controls {
+            justify-content: flex-start;
+        }
+
+        .remove-btn {
+            width: auto;
+            text-align: center;
+        }
+
+        .cart-item .col-md-2.col-3 {
+            margin-bottom: 0;
+        }
+
+        .cart-item .col-md-4.col-5 {
+            margin-bottom: 0;
+        }
+
+        .cart-item .col-md-4.col-7 {
+            margin-bottom: 0;
+        }
+
+        .cart-item .col-md-2.col-12 {
+            margin-top: 15px !important;
+        }
+       
+    }
+</style>

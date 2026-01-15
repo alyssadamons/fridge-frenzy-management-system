@@ -1,0 +1,114 @@
+﻿@model IEnumerable<E_Commerce.Models.Order>
+
+@{
+    ViewData["Title"] = "Order History";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0"><b>My Order History</b></h2>
+        <div class="text-muted">
+            <small>@Model.Count() order@(Model.Count() != 1 ? "s" : "")</small>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-shopping-bag fa-3x text-muted"></i>
+                </div>
+                <h4 class="text-muted">No orders found</h4>
+                <p class="text-muted mb-4">You haven't placed any orders yet.</p>
+                <a href="@Url.Action("Index", "Purchasing")" class="btn btn-primary px-4">
+                    <i class="fas fa-shopping-cart me-2"></i>Start Shopping
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Order #</th>
+                            <th>Date</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model.OrderByDescending(o => o.OrderDate))
+                        {
+                            <tr>
+                                <td class="fw-bold">#@order.Id</td>
+                                <td>
+                                    <div>@order.OrderDate.ToString("dd MMM yyyy")</div>
+                                    <small class="text-muted">@order.OrderDate.ToString("hh:mm tt")</small>
+                                </td>
+                                <td>
+                                    <div>@order.OrderItems.Sum(oi => oi.Quantity) item@(order.OrderItems.Sum(oi => oi.Quantity) != 1 ? "s" : "")</div>
+                                    <small class="text-muted">@order.OrderItems.Count() product@(order.OrderItems.Count() != 1 ? "s" : "")</small>
+                                </td>
+                                <td class="fw-bold">R @order.Total.ToString("N2")</td>
+                                <td>
+                                    @{
+                                        var statusConfig = new Dictionary<string, (string badgeClass, string icon)>
+                                                        {
+                                                        { "Delivered", ("bg-success", "fa-check-circle") },
+                                                        { "Pending", ("bg-warning", "fa-clock") },
+                                                        { "Cancelled", ("bg-danger", "fa-times-circle") },
+                                                        { "Processing", ("bg-info", "fa-cog") },
+                                                        { "Shipped", ("bg-primary", "fa-shipping-fast") },
+                                                        { "Confirmed", ("bg-secondary", "fa-check") }
+                                                        };
+
+                                        if (!statusConfig.TryGetValue(order.Status, out var config))
+                                        {
+                                            config = ("bg-dark", "fa-question-circle");
+                                        }
+                                    }
+                                    <span class="badge @config.badgeClass d-inline-flex align-items-center">
+                                        <i class="fas @config.icon me-1"></i> @order.Status
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="@Url.Action("OrderConfirmation", new { orderId = order.Id })"
+                                           class="btn btn-outline-primary"
+                                           title="View Order Details">
+                                            <i class="fas fa-eye me-1"></i> Details
+                                        </a>
+                                        <a href="@Url.Action("DownloadInvoice", new { orderId = order.Id })"
+                                           class="btn btn-outline-secondary ms-1"
+                                           title="Download Invoice">
+                                            <i class="fas fa-download me-1"></i> Invoice
+                                        </a>
+                                        <!-- ADD THIS BUTTON -->
+                                        <a href="@Url.Action("RegisterFridgeFromOrder", "Services", new { area = "Identity", orderId = order.Id })"
+                                           class="btn btn-outline-success ms-1"
+                                           title="Register Fridges from this Order">
+                                            <i class="fas fa-refrigerator me-1"></i> Register Fridges
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @if (Model.Count() > 5)
+        {
+            <div class="mt-3 text-center">
+                <small class="text-muted">Showing all @Model.Count() orders</small>
+            </div>
+        }
+    }
+</div>

@@ -1,0 +1,468 @@
+﻿@model E_Commerce.ViewModels.CheckoutViewModel
+@{
+    ViewData["Title"] = "Checkout";
+}
+<!-- Preload PayPal SDK -->
+<link rel="preconnect" href="https://www.paypal.com">
+<link rel="dns-prefetch" href="https://www.paypal.com">
+<link rel="preload" href="https://www.paypal.com/sdk/js?client-id=AVPYRsKauhn7lfE7ZuBJWEf0VO2gwFrqMj6j2H7uC4cdy9ehP0_B9DPcc_Mk09ppCgjM3tMQyHsdttJs&currency=USD" as="script">
+
+<div class="checkout-page">
+    <div class="container mt-4">
+        <h2><b>Checkout</b></h2>
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show">
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        <form asp-action="ProcessCheckout" method="post" id="checkoutForm">
+            @Html.AntiForgeryToken()
+            <div class="row">
+                <!-- Order Summary -->
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Order Summary</h4>
+                        </div>
+                        <div class="card-body">
+                            @foreach (var item in Model.CartItems)
+                            {
+                                <div class="row align-items-center mb-4 pb-3 border-bottom">
+                                    <div class="col-3">
+                                        <img src="@Url.Content($"~{item.Product.Image}")" class="img-fluid checkout-product-image" alt="@item.Product.Name"
+                                             onerror="this.onerror=null; this.src='https://via.placeholder.com/120x120?text=Image+Not+Found';" />
+                                    </div>
+                                    <div class="col-5">
+                                        <h6 class="mb-2">@item.Product.Name</h6>
+                                        <small class="text-muted">R @item.Product.Price.ToString("N2") each</small>
+                                    </div>
+                                    <div class="col-2 text-center">
+                                        <span class="text-muted">Qty: @item.Qty</span>
+                                    </div>
+                                    <div class="col-2 text-end">
+                                        <span class="fw-bold">R @((item.Product.Price * item.Qty).ToString("N2"))</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Delivery & Payment Options -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="fas fa-shipping-fast"></i> Delivery & Payment Information</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info mb-4">
+                                <i class="fas fa-info-circle"></i> <strong>Delivery Address:</strong><br>
+                                @Model.DeliveryAddress
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label"><strong><i class="fas fa-user"></i> Company Name:</strong></label>
+                                    <p class="form-control-plaintext">@Model.CustomerName</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label"><strong><i class="fas fa-phone"></i> Phone:</strong></label>
+                                    <p class="form-control-plaintext">@Model.CustomerPhone</p>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label"><i class="fas fa-truck"></i> Delivery Options <span class="text-danger">*</span></label>
+                                <select class="form-select" id="DeliveryOption" name="DeliveryOption" required>
+                                    <option value="Standard" selected>Standard Delivery (R 500.00) - 3-7 business days</option>
+                                    <option value="Express">Express Delivery (R 1,000.00) - 1-2 business days</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="SpecialInstructions" class="form-label"><i class="fas fa-clipboard"></i> Special Instructions (Optional)</label>
+                                <textarea asp-for="SpecialInstructions" class="form-control" rows="2" placeholder="Any special delivery instructions..."></textarea>
+                            </div>
+
+                            <!-- PAYMENT METHOD DROPDOWN -->
+                            <div class="mb-3">
+                                <label asp-for="PaymentMethod" class="form-label"><i class="fas fa-credit-card"></i> Payment Method <span class="text-danger">*</span></label>
+                                <select asp-for="PaymentMethod" class="form-select" id="PaymentMethodSelect" required>
+                                    <option value="">Select Payment Method</option>
+                                    <option value="Cash on Delivery">Cash on Delivery</option>
+                                    <option value="PayPal">PayPal</option>
+                                </select>
+                                <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                            </div>
+
+                            <!-- Cash on Delivery Info -->
+                            <div id="cash-info" class="alert alert-success mt-3" style="display: none;">
+                                <i class="fas fa-money-bill-wave"></i> <strong>Cash on Delivery</strong><br>
+                                <small>Pay with cash or card when your order is delivered. Please have the exact amount ready. A card machine will also be available on the day if you wish to do an EFT.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Summary -->
+                <div class="col-md-4">
+                    <div class="card sticky-summary">
+                        <div class="card-header">
+                            <h4>Payment Summary</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal:</span>
+                                <span id="subtotalDisplay">R @Model.SubTotal.ToString("N2")</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Delivery Fee:</span>
+                                <span id="deliveryFeeDisplay">R @Model.DeliveryFee.ToString("N2")</span>
+                            </div>
+                            <hr />
+                            <div class="d-flex justify-content-between mb-3">
+                                <strong>Total (ZAR):</strong>
+                                <strong class="text-primary" id="totalDisplay">R @Model.Total.ToString("N2")</strong>
+                            </div>
+
+                            <!-- PayPal Amount Notice - Shows when PayPal is selected -->
+                            <div id="paypal-amount-notice" style="display: none;" class="alert alert-info mb-3 small">
+                                <strong><i class="fas fa-info-circle"></i> PayPal Payment:</strong><br>
+                                <div class="mt-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span>ZAR Amount:</span>
+                                        <strong>R <span id="paypal-zar-amount">@Model.Total.ToString("N2")</span></strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-1">
+                                        <span>USD Amount:</span>
+                                        <strong class="text-success">$<span id="paypal-usd-amount">@((Model.Total * 0.054m).ToString("N2"))</span></strong>
+                                    </div>
+                                    <small class="text-muted d-block mt-2">Exchange rate: 1 ZAR = <span id="exchange-rate-display">0.054</span> USD</small>
+                                </div>
+                            </div>
+
+                            <!-- PayPal Button Container - Shows when PayPal is selected -->
+                            <div id="paypal-button-container" style="display: none;" class="mb-3"></div>
+
+                            <!-- Traditional Payment Button - Shows by default for Cash on Delivery -->
+                            <button type="submit" id="placeOrderBtn" class="btn btn-success btn-lg w-100 mb-2" style="display: none;">
+                                <i class="fas fa-check-circle"></i> Complete Order
+                            </button>
+
+                            <a href="@Url.Action("Index")" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-arrow-left"></i> Back to Cart
+                            </a>
+
+                            <div class="alert alert-warning mt-3 small">
+                                <i class="fas fa-shield-alt"></i> <strong>Secure Checkout</strong><br>
+                                Your payment information is encrypted and secure.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .checkout-product-image {
+        height: 120px;
+        width: 100%;
+        object-fit: contain;
+        border-radius: 8px;
+        padding: 5px;
+    }
+
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #e9ecef;
+        border-radius: 12px 12px 0 0 !important;
+        padding: 1rem 1.5rem;
+    }
+
+        .card-header h4 {
+            margin: 0;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+    .border-bottom {
+        border-bottom: 1px solid #e9ecef !important;
+    }
+
+    .sticky-summary {
+        position: sticky;
+        top: 20px;
+    }
+
+    .form-select, .form-control {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+
+        .form-select:focus, .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+    #paypal-button-container {
+        min-height: 50px;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border: none;
+        font-weight: 600;
+        padding: 12px;
+    }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+    .btn-outline-secondary {
+        border-width: 2px;
+        font-weight: 600;
+    }
+
+    @@media (max-width: 768px) {
+        .checkout-product-image {
+            height: 100px;
+        }
+
+        .sticky-summary {
+            position: relative;
+            top: 0;
+        }
+
+        .row.align-items-center > div {
+            margin-bottom: 10px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .checkout-product-image {
+            height: 80px;
+        }
+
+        .card-header h4 {
+            font-size: 1.1rem;
+        }
+    }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="https://www.paypal.com/sdk/js?client-id=AVPYRsKauhn7lfE7ZuBJWEf0VO2gwFrqMj6j2H7uC4cdy9ehP0_B9DPcc_Mk09ppCgjM3tMQyHsdttJs&currency=USD"></script>
+
+    <script>
+        const paymentMethodSelect = document.getElementById('PaymentMethodSelect');
+        const paypalContainer = document.getElementById('paypal-button-container');
+        const paypalNotice = document.getElementById('paypal-amount-notice');
+        const cashInfo = document.getElementById('cash-info');
+        const placeOrderBtn = document.getElementById('placeOrderBtn');
+        const checkoutForm = document.getElementById('checkoutForm');
+        let paypalButtonsRendered = false;
+        let currentExchangeRate = 0.054; // ZAR to USD
+
+        // Fetch real-time exchange rate
+        async function fetchExchangeRate() {
+            try {
+                const response = await fetch('https://api.exchangerate-api.com/v4/latest/ZAR');
+                const data = await response.json();
+                currentExchangeRate = data.rates.USD;
+                document.getElementById('exchange-rate-display').textContent = currentExchangeRate.toFixed(4);
+                console.log('💱 Current ZAR to USD rate:', currentExchangeRate);
+
+                // Store in session
+                fetch('@Url.Action("SetExchangeRate", "Cart")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ exchangeRate: currentExchangeRate })
+                }).catch(err => console.error('Failed to set exchange rate:', err));
+
+                updatePayPalAmounts();
+            } catch (error) {
+                console.error('Failed to fetch exchange rate:', error);
+            }
+        }
+
+        // Update PayPal USD amount based on current ZAR total
+        function updatePayPalAmounts() {
+            const zarTotal = parseFloat(document.getElementById('totalDisplay').textContent.replace('R ', '').replace(/,/g, ''));
+            const usdAmount = (zarTotal * currentExchangeRate).toFixed(2);
+
+            document.getElementById('paypal-zar-amount').textContent = zarTotal.toLocaleString('en-ZA', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('paypal-usd-amount').textContent = usdAmount;
+        }
+
+        // Fetch exchange rate on page load and every 5 minutes
+        fetchExchangeRate();
+        setInterval(fetchExchangeRate, 300000);
+
+        // Handle payment method changes
+        paymentMethodSelect.addEventListener('change', function() {
+            const selectedMethod = this.value;
+            console.log('Payment method changed to:', selectedMethod);
+
+            // Hide everything first
+            cashInfo.style.display = 'none';
+            placeOrderBtn.style.display = 'none';
+            paypalNotice.style.display = 'none';
+            paypalContainer.style.display = 'none';
+
+            if (selectedMethod === 'PayPal') {
+                // Show PayPal notice and buttons in summary
+                paypalNotice.style.display = 'block';
+                paypalContainer.style.display = 'block';
+                updatePayPalAmounts();
+
+                // Initialize PayPal buttons if not already rendered
+                if (!paypalButtonsRendered) {
+                    initializePayPalButton();
+                    paypalButtonsRendered = true;
+                }
+            } else if (selectedMethod === 'Cash on Delivery') {
+                // Show cash info and complete order button
+                cashInfo.style.display = 'block';
+                placeOrderBtn.style.display = 'block';
+            }
+        });
+
+        function initializePayPalButton() {
+            console.log('Initializing PayPal buttons...');
+            paypalContainer.innerHTML = '';
+
+            paypal.Buttons({
+                style: {
+                    layout: 'vertical',
+                    color: 'blue',
+                    shape: 'rect',
+                    label: 'pay'
+                },
+
+                createOrder: function(data, actions) {
+                    console.log('Creating PayPal order...');
+
+                    return fetch('@Url.Action("CreatePayPalOrder", "Cart")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(function(res) {
+                        return res.json();
+                    })
+                    .then(function(data) {
+                        if (data.success) {
+                            console.log('✅ PayPal order created:', data.orderId);
+                            return data.orderId;
+                        } else {
+                            alert('Error creating PayPal order: ' + data.message);
+                            throw new Error(data.message);
+                        }
+                    });
+                },
+
+                onApprove: function(data, actions) {
+                    console.log('Payment approved, capturing...');
+
+                    paypalContainer.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Processing...</span></div><p class="mt-2">Processing payment...</p></div>';
+
+                    return fetch('@Url.Action("CapturePayPalOrder", "Cart")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            orderId: data.orderID
+                        })
+                    })
+                    .then(function(res) {
+                        return res.json();
+                    })
+                    .then(function(details) {
+                        if (details.success) {
+                            console.log('✅ Payment captured successfully');
+                            alert('Payment successful! Redirecting to order confirmation...');
+                            window.location.href = '@Url.Action("OrderConfirmation", "Cart")' + '?orderId=' + details.orderId;
+                        } else {
+                            alert('Payment capture failed: ' + details.message);
+                            initializePayPalButton();
+                        }
+                    })
+                    .catch(function(err) {
+                        console.error('Error capturing payment:', err);
+                        alert('An error occurred while processing your payment. Please try again.');
+                        initializePayPalButton();
+                    });
+                },
+
+                onError: function(err) {
+                    console.error('PayPal error:', err);
+                    alert('An error occurred with PayPal. Please try again or use another payment method.');
+                },
+
+                onCancel: function(data) {
+                    console.log('Payment cancelled');
+                    alert('Payment cancelled. You can try again or choose a different payment method.');
+                }
+            }).render('#paypal-button-container');
+
+            console.log('✅ PayPal buttons initialized');
+        }
+
+        // Handle delivery option changes
+        document.getElementById('DeliveryOption').addEventListener('change', function() {
+            const deliveryOption = this.value;
+            const subtotal = parseFloat('@Model.SubTotal');
+            const deliveryFee = deliveryOption === 'Express' ? 1000 : 500;
+            const total = subtotal + deliveryFee;
+
+            document.getElementById('deliveryFeeDisplay').textContent = 'R ' + deliveryFee.toFixed(2);
+            document.getElementById('totalDisplay').textContent = 'R ' + total.toFixed(2);
+
+            // Update PayPal amounts if PayPal is selected
+            if (paymentMethodSelect.value === 'PayPal') {
+                updatePayPalAmounts();
+            }
+
+            fetch('@Url.Action("SetDeliveryOption", "Cart")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'deliveryOption=' + deliveryOption
+            }).catch(err => console.error('Failed to update delivery option:', err));
+        });
+
+                // Form submission validation
+        checkoutForm.addEventListener('submit', function(e) {
+            const selectedPaymentMethod = paymentMethodSelect.value;
+            console.log('Form submitted with payment method:', selectedPaymentMethod);
+
+            // Only prevent PayPal, allow everything else to submit normally
+            if (selectedPaymentMethod === 'PayPal') {
+                e.preventDefault();
+                alert('Please use the PayPal button to complete your payment');
+                return false;
+            }
+
+            // For Cash on Delivery - allow normal form submission
+            console.log('Allowing form submission for:', selectedPaymentMethod);
+            return true;
+        });
+    </script>
+}

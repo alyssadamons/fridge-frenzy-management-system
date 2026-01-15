@@ -1,0 +1,255 @@
+﻿@{
+    ViewData["Title"] = "Access Denied";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid bg-light min-vh-100 py-5">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-8 col-lg-6 col-xl-5">
+            <div class="card border-0 shadow-lg rounded-3 overflow-hidden">
+                <!-- Header with gradient -->
+                <div class="card-header bg-gradient-danger text-white text-center py-4 position-relative">
+                    <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10">
+                        <div class="pattern-dots-md text-white"></div>
+                    </div>
+                    <div class="position-relative">
+                        <i class="fas fa-ban fa-4x mb-3"></i>
+                        <h1 class="h2 fw-bold mb-0">Access Denied</h1>
+                        <p class="mb-0 opacity-75">Unauthorized Access Attempt</p>
+                    </div>
+                </div>
+
+                <!-- Body -->
+                <div class="card-body text-center p-4 p-md-5">
+                    <!-- Animated icon -->
+                    <div class="mb-4">
+                        <div class="access-denied-icon">
+                            <i class="fas fa-lock fa-3x text-danger mb-3"></i>
+                        </div>
+                    </div>
+
+                    <h3 class="text-danger fw-bold mb-3">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Permission Required
+                    </h3>
+
+                    <p class="lead text-muted mb-4">
+                        You don't have the necessary permissions to access this page.
+                        This area is restricted to authorized personnel only.
+                    </p>
+
+                    <!-- Information Card -->
+                    <div class="alert alert-info border-0 bg-light">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-info-circle text-primary fa-lg mt-1"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="alert-heading mb-2">Need Access?</h5>
+                                <p class="mb-2">If you believe this is a mistake, please contact our administrator:</p>
+
+                                <div class="row text-start mt-3">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="fas fa-phone text-primary me-3"></i>
+                                            <div>
+                                                <small class="text-muted d-block">Phone</small>
+                                                <strong>
+                                                    <a href="tel:0810286437" class="text-decoration-none text-dark">081 028 6437</a>
+                                                </strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="fas fa-envelope text-primary me-3"></i>
+                                            <div>
+                                                <small class="text-muted d-block">Email</small>
+                                                <strong>
+                                                    <a href="mailto:admin@fridgefrenzy.com" class="text-decoration-none text-dark">
+                                                        admin@fridgefrenzy.com
+                                                    </a>
+                                                </strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current User Info -->
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <div class="alert alert-warning border-0 small">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user me-2"></i>
+                                <div>
+                                    <strong>Logged in as:</strong> @User.Identity.Name
+                                    <br>
+                                    <strong>Roles:</strong>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <span class="badge bg-danger">Administrator</span>
+                                    }
+                                    else if (User.IsInRole("Sales"))
+                                    {
+                                        <span class="badge bg-primary">Sales Representative</span>
+                                    }
+                                    else if (User.IsInRole("CustomerManager"))
+                                    {
+                                        <span class="badge bg-info">Customer Manager</span>
+                                    }
+                                    else if (User.IsInRole("Technician"))
+                                    {
+                                        <span class="badge bg-warning">Technician</span>
+                                    }
+                                    else if (User.IsInRole("Employee"))
+                                    {
+                                        <span class="badge bg-secondary">Employee</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">Customer</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-center mt-4">
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-primary btn-lg px-4 me-md-2">
+                            <i class="fas fa-home me-2"></i>
+                            Go Home
+                        </a>
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary btn-lg px-4">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Go Back
+                        </a>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div class="mt-4 pt-3 border-top">
+                        <p class="text-muted small mb-2">Quick navigation:</p>
+                        <div class="d-flex flex-wrap justify-content-center gap-2">
+                            <a href="@Url.Action("Index", "Purchasing")" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-store me-1"></i>Shop
+                            </a>
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-info-circle me-1"></i>About
+                            </a>
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <a href="@Url.Page("/Account/Manage/Index", new { area = "Identity" })" class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-user-cog me-1"></i>Profile
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .bg-gradient-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+        }
+
+        .access-denied-icon {
+            animation: bounce 2s infinite;
+        }
+
+        .pattern-dots-md {
+            opacity: 0.1;
+            background-image: radial-gradient(currentColor 1px, transparent 1px);
+            background-size: 10px 10px;
+        }
+
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+            }
+
+        .btn {
+            transition: all 0.3s ease;
+        }
+
+            .btn:hover {
+                transform: translateY(-2px);
+            }
+
+        @@keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-10px);
+            }
+
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 768px) {
+            .card-body {
+                padding: 2rem !important;
+            }
+
+            .btn-lg {
+                padding: 0.75rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Add some interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add pulse animation to the lock icon on hover
+            const lockIcon = document.querySelector('.access-denied-icon');
+            if (lockIcon) {
+                lockIcon.addEventListener('mouseenter', function() {
+                    this.style.animation = 'bounce 1s infinite';
+                });
+
+                lockIcon.addEventListener('mouseleave', function() {
+                    this.style.animation = 'bounce 2s infinite';
+                });
+            }
+
+            // Auto-hide the info alert after 15 seconds
+            setTimeout(() => {
+                const alert = document.querySelector('.alert-info');
+                if (alert) {
+                    alert.style.opacity = '0';
+                    alert.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => {
+                        if (alert.parentNode) {
+                            alert.style.display = 'none';
+                        }
+                    }, 500);
+                }
+            }, 15000);
+
+            // Log access denied event
+            console.log('Access Denied Page Accessed:', {
+                user: '@User.Identity?.Name' || 'Anonymous',
+                timestamp: new Date().toISOString(),
+                path: document.referrer || 'Direct access'
+            });
+        });
+    </script>
+}

@@ -1,0 +1,1034 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="home-page">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">Keepin it cool, Keepin it running</h1>
+                <p class="hero-subtitle">
+                    The one stop place for premium refrigerators,<br>
+                    expert repairs, and reliable maintenance.
+                </p>
+                <div class="hero-description">
+                    <p>
+                        At Fridge Frenzy, we're committed to making your experience as cool and convenient as possible.
+                        Our platform offers a complete range of services tailored to all your refrigeration needs.
+                        Whether you're looking to buy a new fridge, report a fault, or schedule professional
+                        maintenance services such as re-gassing and repairs, we've got you covered.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Services Grid positioned next to the text -->
+            <div class="services-grid">
+                <!-- Purchase a Fridge -->
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-shopping-cart fa-2x"></i>
+                    </div>
+                    <h3 class="service-title">Purchase a Fridge</h3>
+                    <p class="service-description">
+                        View your selection of premium fridges
+                    </p>
+                    <a class="service-link" asp-area="" asp-controller="Purchasing" asp-action="Index">Browse Products</a>
+                </div>
+
+                <!-- Maintenance -->
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-tools fa-2x"></i>
+                    </div>
+                    <h3 class="service-title">Maintenance</h3>
+                    <p class="service-description">
+                        Book an appointment for fridge maintenance
+                    </p>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="service-link" asp-area="Identity" asp-controller="Services" asp-action="Index" >Schedule Service</a>
+                    }
+                    else
+                    {
+                        <a class="service-link" asp-area="Identity" asp-page="/Account/Login">Login to Schedule Service</a>
+                    }
+                </div>
+
+                <!-- Fault Response -->
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                    <h3 class="service-title">Fault Response</h3>
+                    <p class="service-description">
+                        Create a fault report on your fridge
+                    </p>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="service-link" asp-area="Identity" asp-controller="Services" asp-action="Index" >Report Issue</a>
+                    }
+                    else
+                    {
+                        <a class="service-link" asp-area="Identity" asp-page="/Account/Login">Login to Report Issue</a>
+                    }
+                </div>
+
+                <!-- Customer Service -->
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-headset fa-2x"></i>
+                    </div>
+                    <h3 class="service-title">Customer Service</h3>
+                    <p class="service-description">
+                        Manage your account details and preferences
+                    </p>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="service-link" asp-area="Identity" asp-page="/Account/Manage/Index">Manage Account</a>
+                    }
+                    else
+                    {
+                        <a class="service-link" asp-area="Identity" asp-page="/Account/Login">Login to Manage Account</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Counter Section -->
+    <section class="stats-section py-5">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3 col-6 mb-4">
+                    <div class="stat-item">
+                        <div class="stat-number" data-count="500">0</div>
+                        <div class="stat-label">Happy Customers</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-4">
+                    <div class="stat-item">
+                        <div class="stat-number" data-count="1200">0</div>
+                        <div class="stat-label">Fridges Sold</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-4">
+                    <div class="stat-item">
+                        <div class="stat-number" data-count="850">0</div>
+                        <div class="stat-label">Repairs Completed</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-4">
+                    <div class="stat-item">
+                        <div class="stat-number" data-count="24">0</div>
+                        <div class="stat-label">Hour Support</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="steps-section py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">How It Works</h2>
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="step-card text-center">
+                        <div class="step-number">1</div>
+                        <div class="step-icon">
+                            <i class="fas fa-search fa-2x"></i>
+                        </div>
+                        <h4>Browse & Select</h4>
+                        <p>Explore our range of premium refrigerators or schedule a service</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="step-card text-center">
+                        <div class="step-number">2</div>
+                        <div class="step-icon">
+                            <i class="fas fa-calendar-check fa-2x"></i>
+                        </div>
+                        <h4>Book & Schedule</h4>
+                        <p>Choose your preferred date and time for delivery or service</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="step-card text-center">
+                        <div class="step-number">3</div>
+                        <div class="step-icon">
+                            <i class="fas fa-truck fa-2x"></i>
+                        </div>
+                        <h4>We Deliver/Service</h4>
+                        <p>Our team delivers your fridge or performs the scheduled service</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="step-card text-center">
+                        <div class="step-number">4</div>
+                        <div class="step-icon">
+                            <i class="fas fa-thumbs-up fa-2x"></i>
+                        </div>
+                        <h4>Enjoy & Relax</h4>
+                        <p>Your fridge is running perfectly with our ongoing support</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Replace Reviews Section with Local Testimonials -->
+    <section class="reviews-section py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">What Our South African Customers Say</h2>
+            <div class="row">
+                <!-- Local Business Owner -->
+                <div class="col-md-4 mb-4">
+                    <div class="review-card">
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                        <p class="review-text">
+                            "Fridge Frenzy saved my spaza shop during load shedding. Their backup power solutions kept my fridges running. Sharp sharp service!"
+                        </p>
+                        <div class="review-author">
+                            <strong>Bongani Khumalo</strong>
+                            <span>Spaza Shop Owner, Soweto</span>
+                        </div>
+                        <div class="sa-flag">
+                            🇿🇦
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Township Restaurant -->
+                <div class="col-md-4 mb-4">
+                    <div class="review-card">
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <p class="review-text">
+                            "Eish, these okes know their stuff! Fixed my braai fridge just before the big rugby weekend. No more warm Castle Lagers!"
+                        </p>
+                        <div class="review-author">
+                            <strong>Johan van der Merwe</strong>
+                            <span>Restaurant Owner, Cape Town</span>
+                        </div>
+                        <div class="sa-flag">
+                            🇿🇦
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rural Clinic -->
+                <div class="col-md-4 mb-4">
+                    <div class="review-card">
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                        <p class="review-text">
+                            "In our rural clinic, vaccine storage is critical. Fridge Frenzy's reliable service ensures our medicines stay cold. Baie dankie!"
+                        </p>
+                        <div class="review-author">
+                            <strong>Sister Thandiwe</strong>
+                            <span>Clinic Manager, Limpopo</span>
+                        </div>
+                        <div class="sa-flag">
+                            🇿🇦
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Load Shedding Solutions -->
+    <section class="loadshedding-section py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="loadshedding-content">
+                        <span class="section-badge">🇿🇦 South African Solution</span>
+                        <h2 class="loadshedding-title">Load Shedding Worries?</h2>
+                        <p class="loadshedding-subtitle">We've got your back with load shedding-proof solutions!</p>
+                        <div class="solutions-list">
+                            <div class="solution-item">
+                                <div class="solution-icon">🔄</div>
+                                <div class="solution-text">
+                                    <strong>Backup power compatible fridges</strong>
+                                    <p>Designed to work seamlessly with generators and UPS systems</p>
+                                </div>
+                            </div>
+                            <div class="solution-item">
+                                <div class="solution-icon">⚡</div>
+                                <div class="solution-text">
+                                    <strong>Low-power consumption models</strong>
+                                    <p>Energy efficient fridges that use less electricity during outages</p>
+                                </div>
+                            </div>
+                            <div class="solution-item">
+                                <div class="solution-icon">🔋</div>
+                                <div class="solution-text">
+                                    <strong>Extended cold retention technology</strong>
+                                    <p>Keeps contents cold for hours during power cuts</p>
+                                </div>
+                            </div>
+                            <div class="solution-item">
+                                <div class="solution-icon">🚗</div>
+                                <div class="solution-text">
+                                    <strong>Emergency response during outages</strong>
+                                    <p>Priority service when load shedding causes issues</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="loadshedding-image">
+                        <img src="https://minus40.co.za/wp-content/uploads/2023/01/B300-Loadshedding-768x768.jpg"
+                             alt="Fridge technician working during load shedding"
+                             class="img-fluid rounded shadow">
+                        <div class="image-caption">
+                            <i class="fas fa-shield-alt me-2"></i>Your refrigeration is safe with us, even during stage 6
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Load Shedding Status Banner -->
+            <div class="loadshedding-status mt-4">
+                <div class="status-alert">
+                    <div class="status-indicator"></div>
+                    <div class="status-content">
+                        <strong>Current Load Shedding Status:</strong>
+                        <span class="status-stage" id="currentStage">Checking...</span>
+                        <small class="status-update">Updated: <span id="lastUpdate">Just now</span></small>
+                    </div>
+                    <div class="status-actions">
+                        <button class="btn btn-sm btn-outline-dark" onclick="updateLoadSheddingStatus()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Proud Partners Section -->
+    <section class="partners-section py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">Our Proud Partners</h2>
+            <p class="text-center mb-5 lead">Working with industry leaders to bring you the best refrigeration solutions</p>
+
+            <div class="row justify-content-center align-items-center">
+                <!-- Samsung -->
+                <div class="col-7 col-md-3 col-lg-2 mb-4">
+                    <div class="partner-logo">
+                        <img src="~/img/partners/SAMSUNG.png"
+                             alt="Samsung"
+                             class="img-fluid"
+                             title="Samsung">
+                    </div>
+                </div>
+
+                <!-- LG -->
+                <div class="col-7 col-md-3 col-lg-2 mb-4">
+                    <div class="partner-logo">
+                        <img src="~/img/partners/LG.png"
+                             alt="LG"
+                             class="img-fluid"
+                             title="LG">
+                    </div>
+                </div>
+
+                <!-- Whirlpool -->
+                <div class="col-7 col-md-3 col-lg-2 mb-4">
+                    <div class="partner-logo">
+                        <img src="~/img/partners/WHIRLPOOL.png"
+                             alt="Whirlpool"
+                             class="img-fluid"
+                             title="Whirlpool">
+                    </div>
+                </div>
+
+                <!-- Hisense -->
+                <div class="col-7 col-md-3 col-lg-2 mb-4">
+                    <div class="partner-logo">
+                        <img src="~/img/partners/HISENSE.png"
+                             alt="Hisense"
+                             class="img-fluid"
+                             title="Hisense">
+                    </div>
+                </div>
+
+                <!-- Defy -->
+                <div class="col-7 col-md-3 col-lg-2 mb-4">
+                    <div class="partner-logo">
+                        <img src="~/img/partners/DEFY.png"
+                             alt="Defy"
+                             class="img-fluid"
+                             title="Defy">
+                    </div>
+                </div>
+
+                <!-- Kelvinator -->
+                <div class="col-7 col-md-3 col-lg-2 mb-4">
+                    <div class="partner-logo">
+                        <img src="~/img/partners/KELVINATOR.png"
+                             alt="Kelvinator"
+                             class="img-fluid"
+                             title="Kelvinator">
+                    </div>
+                </div>
+
+                
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta-section py-5 text-center">
+        <div class="container">
+            <h2 class="mb-4">Ready to Get Your Fridge Solution?</h2>
+            <p class="mb-4 lead">
+                Join hundreds of satisfied customers who trust Fridge Frenzy for their refrigeration needs.
+            </p>
+            <div class="cta-buttons">
+                <a class="btn btn-primary btn-lg me-3" asp-controller="Purchasing" asp-action="Index">
+                    <i class="fas fa-shopping-cart me-2"></i>Shop Fridges
+                </a>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a class="btn btn-primary btn-lg me-3" asp-area="Identity" asp-controller="Services" asp-action="Index">Schedule Service</a>
+                }
+                else
+                {
+                    <a class="btn btn-primary btn-lg me-3" asp-area="Identity" asp-page="/Account/Login">Login to Schedule Service</a>
+                }
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+
+    /* Load Shedding Section */
+    .loadshedding-section {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        border-top: 3px solid #ffc107;
+        border-bottom: 3px solid #ffc107;
+    }
+
+    .section-badge {
+        background: #dc3545;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 1.5rem;
+    }
+
+    .loadshedding-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    .loadshedding-subtitle {
+        font-size: 1.3rem;
+        color: #666;
+        margin-bottom: 2rem;
+        font-weight: 500;
+    }
+
+    .solutions-list {
+        margin-bottom: 2.5rem;
+    }
+
+    .solution-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+        .solution-item:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateX(5px);
+        }
+
+    .solution-icon {
+        font-size: 1.8rem;
+        margin-right: 1rem;
+        min-width: 50px;
+        text-align: center;
+    }
+
+    .solution-text strong {
+        color: #333;
+        font-size: 1.1rem;
+        display: block;
+        margin-bottom: 0.3rem;
+    }
+
+    .solution-text p {
+        color: #666;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .loadshedding-cta {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .loadshedding-image {
+        position: relative;
+    }
+
+        .loadshedding-image img {
+            border: 3px solid white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+    .image-caption {
+        position: absolute;
+        bottom: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 25px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        font-weight: 500;
+        color: #333;
+        white-space: nowrap;
+    }
+
+    /* Load Shedding Status Banner */
+    .loadshedding-status {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid #dc3545;
+    }
+
+    .status-alert {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .status-indicator {
+        width: 12px;
+        height: 12px;
+        background: #dc3545;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    .status-content {
+        flex: 1;
+    }
+
+    .status-stage {
+        background: #dc3545;
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-weight: bold;
+        margin: 0 0.5rem;
+    }
+
+    .status-update {
+        color: #666;
+        margin-left: 0.5rem;
+    }
+
+    @@keyframes pulse {
+        0%
+
+    {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
+
+    }
+
+    /* Responsive Design for Load Shedding Section */
+    @@media (max-width: 768px) {
+        .loadshedding-title
+
+    {
+        font-size: 2rem;
+    }
+
+    .loadshedding-subtitle {
+        font-size: 1.1rem;
+    }
+
+    .solution-item {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .solution-icon {
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+    }
+
+    .loadshedding-cta {
+        flex-direction: column;
+    }
+
+        .loadshedding-cta .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+    .image-caption {
+        position: relative;
+        bottom: 0;
+        left: 0;
+        transform: none;
+        margin-top: 1rem;
+        white-space: normal;
+        text-align: center;
+    }
+
+    .status-alert {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .status-content {
+        margin: 0.5rem 0;
+    }
+
+    }
+
+  
+
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 4rem 0;
+    }
+
+    .hero-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        align-items: center;
+    }
+
+    .hero-title {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        color: #666;
+        margin-bottom: 1.5rem;
+        line-height: 1.4;
+    }
+
+    .hero-description {
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .services-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .service-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+    .service-icon {
+        color: #0d6efd;
+        margin-bottom: 1rem;
+    }
+
+    .service-title {
+        color: #333;
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+    }
+
+    .service-description {
+        color: #666;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+    }
+
+    .service-link {
+        display: inline-block;
+        background: #0d6efd;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background 0.3s ease;
+    }
+
+        .service-link:hover {
+            background: #0b5ed7;
+            color: white;
+            text-decoration: none;
+        }
+
+    /* Stats Section */
+    .stats-section {
+        background: transparent;
+    }
+
+    .stat-item {
+        padding: 20px 0;
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #5297b3;
+    }
+
+    .stat-label {
+        font-size: 1.1rem;
+        color: #666;
+        font-weight: 500;
+    }
+
+    /* Steps Section */
+    .steps-section {
+        background: #f8f9fa !important;
+    }
+
+    .step-card {
+        padding: 2rem 1rem;
+        border-radius: 10px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+        .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+    .step-number {
+        width: 40px;
+        height: 40px;
+        background: #5297b3;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin: 0 auto 1rem;
+    }
+
+    .step-icon {
+        color: #5297b3;
+        margin-bottom: 1rem;
+    }
+
+    .step-card h4 {
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    /* Reviews Section */
+    .reviews-section {
+        background: transparent;
+    }
+
+    .review-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        height: 100%;
+        transition: transform 0.3s ease;
+    }
+
+        .review-card:hover {
+            transform: translateY(-3px);
+        }
+
+    .review-stars {
+        color: #ffc107;
+        margin-bottom: 1rem;
+    }
+
+    .review-text {
+        font-style: italic;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .review-author strong {
+        display: block;
+        color: #333;
+    }
+
+    .review-author span {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    /* Partners Section */
+    .partners-section {
+        background: #f8f9fa !important;
+    }
+
+    .partner-logo {
+        height: 140px;
+        text-align: center;
+        padding: 2rem 1rem;
+        transition: all 0.3s ease;
+        filter: grayscale(100%);
+        opacity: 0.7;
+        transform: scale(0.9);
+    }
+
+        .partner-logo:hover {
+            filter: grayscale(0%);
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .partner-logo img {
+            max-height: 80px;
+            width: auto;
+            transition: all 0.3s ease;
+        }
+
+    /* Ensure the logos are properly sized and centered */
+    .partners-section .row {
+        min-height: 200px;
+    }
+
+    /* CTA Section */
+    .cta-section {
+        background: transparent;
+    }
+
+    .cta-buttons {
+        margin-top: 2rem;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .hero-content {
+            grid-template-columns: 1fr;
+            text-align: center;
+        }
+
+        .services-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+        }
+
+        .partner-logo {
+            padding: 1rem 0.5rem;
+        }
+
+            .partner-logo img {
+                max-height: 40px;
+            }
+
+        .cta-buttons .btn {
+            display: block;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+            .cta-buttons .btn:last-child {
+                margin-bottom: 0;
+            }
+    }
+
+    @@media (max-width: 576px) {
+        .hero-section {
+            padding: 2rem 0;
+        }
+
+        .hero-content {
+            padding: 0 1rem;
+        }
+
+        .service-card {
+            padding: 1.5rem 1rem;
+        }
+
+        .step-card {
+            padding: 1.5rem 0.5rem;
+        }
+
+        .review-card {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animated counter
+        const counters = document.querySelectorAll('.stat-number');
+        const speed = 200;
+
+        counters.forEach(counter => {
+            const updateCount = () => {
+                const target = +counter.getAttribute('data-count');
+                const count = +counter.innerText;
+                const increment = target / speed;
+
+                if (count < target) {
+                    counter.innerText = Math.ceil(count + increment);
+                    setTimeout(updateCount, 1);
+                } else {
+                    counter.innerText = target;
+                }
+            };
+
+            updateCount();
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add intersection observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements for fade-in
+        const fadeElements = document.querySelectorAll('.service-card, .step-card, .review-card, .stat-item');
+        fadeElements.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    });
+
+        // Load Shedding Status Functionality
+    function updateLoadSheddingStatus() {
+        const stages = [
+            'No Load Shedding 🟢',
+            'Stage 1 🟡',
+            'Stage 2 🟠',
+            'Stage 3 🟠',
+            'Stage 4 🔴',
+            'Stage 5 🔴',
+            'Stage 6 🔴',
+            'Stage 7 🚨',
+            'Stage 8 🚨'
+        ];
+
+        // Simulate random stage for demo (in real app, you'd fetch from Eskom API)
+        const randomStage = stages[Math.floor(Math.random() * stages.length)];
+        const currentTime = new Date().toLocaleTimeString('en-ZA', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        document.getElementById('currentStage').textContent = randomStage;
+        document.getElementById('lastUpdate').textContent = currentTime;
+
+        // Update status indicator color based on stage
+        const statusIndicator = document.querySelector('.status-indicator');
+        if (randomStage.includes('No Load Shedding')) {
+            statusIndicator.style.background = '#28a745';
+        } else if (randomStage.includes('Stage 1') || randomStage.includes('Stage 2')) {
+            statusIndicator.style.background = '#ffc107';
+        } else if (randomStage.includes('Stage 3') || randomStage.includes('Stage 4')) {
+            statusIndicator.style.background = '#fd7e14';
+        } else {
+            statusIndicator.style.background = '#dc3545';
+        }
+    }
+
+    // Initialize load shedding status when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        updateLoadSheddingStatus();
+
+        // Update every 5 minutes
+        setInterval(updateLoadSheddingStatus, 300000);
+
+        // ... rest of your existing JavaScript code
+    });
+</script>

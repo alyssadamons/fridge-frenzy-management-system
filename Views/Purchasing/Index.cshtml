@@ -1,0 +1,512 @@
+﻿@using E_Commerce.ViewModels
+@using System.Globalization
+@using System.Linq
+@model ProductViewModel
+
+@{
+    ViewData["Title"] = "All Products";
+    string selectedCategoryName = "All Products";
+    string filterDisplay = "All";
+
+    // Set category name based on selection
+    if (Model.SelectedCategoryId.HasValue && Model.SelectedCategoryId > 0)
+    {
+        var selectedCategory = Model.Categories.FirstOrDefault(c => c.Id == Model.SelectedCategoryId.Value);
+        if (selectedCategory != null)
+        {
+            selectedCategoryName = selectedCategory.Name;
+        }
+    }
+
+    // Set filter display text
+    if (!string.IsNullOrEmpty(Model.PriceRange) && Model.PriceRange != "all")
+    {
+        filterDisplay = Model.PriceRange switch
+        {
+            "under10000" => "Under R10,000",
+            "10000-50000" => "R10,000 - R50,000",
+            "50000-100000" => "R50,000 - R100,000",
+            "over100000" => "Over R100,000",
+            _ => "All"
+        };
+    }
+
+    if (!string.IsNullOrEmpty(Model.SortBy) && Model.SortBy != "name")
+    {
+        var sortText = Model.SortBy switch
+        {
+            "price_low" => "Price: Low to High",
+            "price_high" => "Price: High to Low",
+            _ => ""
+        };
+
+        if (!string.IsNullOrEmpty(sortText))
+        {
+            filterDisplay = filterDisplay == "All" ? sortText : $"{filterDisplay} | {sortText}";
+        }
+    }
+}
+
+<!-- Filters Section -->
+<section class="py-3 bg-light">
+    <div class="container">
+        <!-- Category Cards - Made Smaller to fit in one line -->
+        <div class="row gx-2 gx-lg-3 row-cols-8 row-cols-md-10 row-cols-lg-12 justify-content-center mb-4">
+            <!-- Increased columns and reduced gap -->
+            <!-- All Products Card (Default/No Category) -->
+            <div class="col mb-3">
+                <a asp-controller="Purchasing" asp-action="Index"
+                   asp-route-categoryid=""
+                   class="card-link @(!Model.SelectedCategoryId.HasValue ? "active-category" : "")">
+                    <div class="card h-100 category-card" style="cursor: pointer;">
+                        <div class="category-image-wrapper">
+                            <div class="d-flex align-items-center justify-content-center h-100">
+                                <i class="fas fa-boxes fa-1x text-muted"></i> <!-- Smaller icon -->
+                            </div>
+                        </div>
+                        <div class="card-body p-1">
+                            <!-- Reduced padding -->
+                            <div class="text-center">
+                                <small class="fw-bold">All</small> <!-- Smaller text -->
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            @foreach (var category in Model.Categories)
+            {
+                <div class="col mb-3">
+                    <a asp-controller="Purchasing" asp-action="Index"
+                       asp-route-categoryid="@category.Id"
+                       class="card-link @(Model.SelectedCategoryId == category.Id ? "active-category" : "")">
+                        <div class="card h-100 category-card" style="cursor: pointer;">
+                            <div class="category-image-wrapper">
+                                <!-- Fixed category image with proper path handling -->
+                                @if (!string.IsNullOrEmpty(category.Image))
+                                {
+                                    <img class="category-image-small"
+                                         src="@Url.Content($"~{category.Image.Replace("/grp-03-07/", "/")}")"
+                                         alt="@category.Name"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                    <div class="d-flex align-items-center justify-content-center h-100" style="display: none;">
+                                        <i class="fas fa-tag fa-1x text-muted"></i>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="d-flex align-items-center justify-content-center h-100">
+                                        <i class="fas fa-tag fa-1x text-muted"></i>
+                                    </div>
+                                }
+                            </div>
+                            <div class="card-body p-1">
+                                <div class="text-center">
+                                    <small class="fw-bold">@category.Name</small>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+
+        <!-- Filters Row - Auto-apply when selections change -->
+        <div class="row g-4 align-items-end justify-content-center">
+            <!-- Price Range -->
+            <div class="col-auto">
+                <label class="form-label fw-bold mb-1 small">Price Range:</label>
+                <select class="form-select form-select-sm auto-apply-filter" id="priceRangeFilter" style="min-width: 150px;">
+                    <option value="all" selected="@(Model.PriceRange == "all")">All Prices</option>
+                    <option value="under10000" selected="@(Model.PriceRange == "under10000")">Under R10,000</option>
+                    <option value="10000-50000" selected="@(Model.PriceRange == "10000-50000")">R10,000 - R50,000</option>
+                    <option value="50000-100000" selected="@(Model.PriceRange == "50000-100000")">R50,000 - R100,000</option>
+                    <option value="over100000" selected="@(Model.PriceRange == "over100000")">Over R100,000</option>
+                </select>
+            </div>
+
+            <!-- Sort By -->
+            <div class="col-auto">
+                <label class="form-label fw-bold mb-1 small">Sort By:</label>
+                <select class="form-select form-select-sm auto-apply-filter" id="sortFilter" style="min-width: 150px;">
+                    <option value="name" selected="@(Model.SortBy == "name")">Name (A-Z)</option>
+                    <option value="price_low" selected="@(Model.SortBy == "price_low")">Price (Low to High)</option>
+                    <option value="price_high" selected="@(Model.SortBy == "price_high")">Price (High to Low)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="my-4" />
+
+@* Show the count of products found and the category name with filter info *@
+<h2 class="text-center mb-4">
+    Fridge Results for @selectedCategoryName <span class="text-muted">(@filterDisplay)</span> <span class="text-primary">(@Model.Products.Count)</span>
+</h2>
+
+<!-- Products Section -->
+<section class="py-5">
+    <div class="container px-4 px-lg-5 mt-3">
+        @if (!Model.Products.Any())
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No products found</h4>
+                <p class="text-muted">Try adjusting your filters to see more products.</p>
+                <button class="btn btn-primary" onclick="clearFilters()">Clear All Filters</button>
+            </div>
+        }
+        else
+        {
+            <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+                @foreach (var product in Model.Products)
+                {
+                    <div class="col mb-5">
+                        <div class="card h-100 product-card">
+                            <!-- Product image and info - NOT clickable -->
+                            <div class="text-decoration-none text-dark">
+                                <div class="image-container" style="height: 200px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                                    <img class="product-image img-fluid"
+                                         src="@Url.Content($"~{product.Image}")"
+                                         alt="@product.Name"
+                                         style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 10px;"
+                                         onerror="console.log('Image failed to load:', this.src)">
+                                </div>
+
+                                <div class="card-body p-4 d-flex flex-column">
+                                    <div class="text-center">
+                                        <h5 class="fw-bolder product-name">@product.Name</h5>
+                                        <div class="product-price fw-bold text-primary">
+                                            @product.Price.ToString("C", new CultureInfo("en-ZA"))
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-footer border-top-0 bg-transparent">
+                                <div class="text-center">
+                                    <form class="add-to-cart-form" data-product-id="@product.ProductId" data-product-name="@product.Name">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-dark w-100">
+                                            <i class="fas fa-cart-plus me-2"></i>Add to cart
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // Filter Functions - Auto-apply when selections change
+        function applyFilters() {
+            const priceRange = document.getElementById('priceRangeFilter').value;
+            const sortBy = document.getElementById('sortFilter').value;
+            const currentUrl = new URL(window.location.href);
+            const categoryId = currentUrl.searchParams.get('categoryid');
+
+            let url = '@Url.Action("Index", "Purchasing")';
+            const params = [];
+
+            if (categoryId) {
+                params.push(`categoryid=${categoryId}`);
+            }
+
+            if (priceRange && priceRange !== 'all') {
+                params.push(`priceRange=${priceRange}`);
+            }
+
+            if (sortBy && sortBy !== 'name') {
+                params.push(`sortBy=${sortBy}`);
+            }
+
+            if (params.length > 0) {
+                url += '?' + params.join('&');
+            }
+
+            console.log('Applying filters:', { priceRange, sortBy, categoryId });
+            window.location.href = url;
+        }
+
+        function clearFilters() {
+            console.log('Clearing all filters');
+            window.location.href = '@Url.Action("Index", "Purchasing")';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Products page loaded, initializing auto-apply filters');
+
+            // Auto-apply filters when dropdowns change
+            document.querySelectorAll('.auto-apply-filter').forEach(function(select) {
+                select.addEventListener('change', function() {
+                    console.log('Filter changed, auto-applying...');
+                    // Small delay to ensure the change is registered
+                    setTimeout(applyFilters, 100);
+                });
+            });
+
+            // Add to cart functionality
+            document.querySelectorAll('.add-to-cart-form').forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const productId = this.getAttribute('data-product-id');
+                    const button = this.querySelector('button[type="submit"]');
+                    const originalHtml = button.innerHTML;
+
+                    console.log('🔵 Adding product to cart:', productId);
+
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Adding...';
+
+                    const formData = new FormData(this);
+                    formData.append('productId', productId);
+                    formData.append('qty', '1');
+
+                    fetch('@Url.Action("AddToCart", "Cart")', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(response => {
+                        console.log('📥 Response status:', response.status);
+
+                        if (response.status === 401) {
+                            alert('Please login to add items to cart');
+                            window.location.href = '/Identity/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+                            return;
+                        }
+
+                        if (!response.ok) {
+                            throw new Error('Server returned ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (!data) return;
+
+                        console.log('✅ Server response:', data);
+
+                        if (data.success) {
+                            if (typeof showGlobalToast === 'function') {
+                                showGlobalToast('success', data.message);
+                            } else {
+                                alert(data.message);
+                            }
+
+                            if (data.cartCount !== undefined) {
+                                const cartBadge = document.getElementById('cartCount');
+                                if (cartBadge) {
+                                    cartBadge.textContent = data.cartCount;
+                                    cartBadge.style.display = data.cartCount > 0 ? 'inline-block' : 'none';
+                                }
+                            }
+                        } else {
+                            if (data.redirectToLogin) {
+                                alert(data.message || 'Please login to add items to cart');
+                                window.location.href = '/Identity/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+                            } else {
+                                if (typeof showGlobalToast === 'function') {
+                                    showGlobalToast('error', data.message || 'Failed to add to cart');
+                                } else {
+                                    alert(data.message || 'Failed to add to cart');
+                                }
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ Error adding to cart:', error);
+                        if (typeof showGlobalToast === 'function') {
+                            showGlobalToast('error', 'Error adding product to cart. Please try again.');
+                        } else {
+                            alert('Error adding product to cart. Please try again.');
+                        }
+                    })
+                    .finally(() => {
+                        button.disabled = false;
+                        button.innerHTML = originalHtml;
+                    });
+                });
+            });
+        });
+    </script>
+
+    <style>
+        /* Global Card Styles */
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 0.5rem;
+        }
+
+            .card:hover {
+                transform: scale(1.05);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+
+        .card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .active-category .card {
+            border: 2px solid #007bff;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+
+        /* === Smaller Category Styles === */
+        .category-card {
+            height: 100px !important; /* Much smaller height */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .category-image-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 5px !important; /* Reduced padding */
+            height: 60px !important; /* Smaller height */
+            overflow: hidden;
+        }
+
+        .category-image-small {
+            max-width: 50px !important; /* Smaller images */
+            max-height: 50px !important;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .category-card .card-body {
+            padding: 4px !important; /* Minimal padding */
+        }
+
+        .category-card small {
+            font-size: 0.7rem !important; /* Smaller text */
+            line-height: 1.1;
+        }
+
+        /* === Product Styles === */
+        .product-small-card {
+            height: 440px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .product-image-wrapper-small {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            height: 280px;
+            overflow: hidden;
+        }
+
+        .product-image-small {
+            max-width: 95%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
+        /* === Filter Controls - Properly Aligned === */
+        .filter-controls-row {
+            display: flex;
+            align-items: end !important; /* Align to bottom */
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-control-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 150px;
+        }
+
+        .btn-dark, .btn-secondary {
+            color: white !important;
+            font-weight: 600;
+        }
+
+            .btn-dark:hover, .btn-secondary:hover {
+                color: white !important;
+                opacity: 0.9;
+            }
+
+        /* Form controls */
+        .form-select-sm {
+            height: 38px;
+            font-size: 0.875rem;
+            padding: 0.375rem 0.75rem;
+        }
+
+        /* Labels */
+        .form-label {
+            margin-bottom: 0.5rem;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+            .form-label.small {
+                font-size: 0.8rem;
+            }
+
+        /* Clear button styling */
+        .btn-outline-secondary {
+            border-color: #6c757d;
+            color: #6c757d;
+        }
+
+            .btn-outline-secondary:hover {
+                background-color: #6c757d;
+                color: white;
+            }
+
+        /* Responsive adjustments */
+        @@media (max-width: 768px) {
+            .category-card {
+                height: 90px !important;
+            }
+
+            .category-image-wrapper {
+                height: 50px !important;
+                padding: 3px !important;
+            }
+
+            .category-image-small {
+                max-width: 40px !important;
+                max-height: 40px !important;
+            }
+
+            .filter-control-group {
+                min-width: 120px;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .row-cols-8 > * {
+                flex: 0 0 25%;
+                max-width: 25%;
+            }
+
+            .filter-control-group,
+            .col-auto {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+}

@@ -1,0 +1,748 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title class="fas fa-snowflake me-2">@ViewData["Title"] - Fridge Frenzy</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❄️</text></svg>">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Navbar height adjustment */
+        .navbar {
+            min-height: 60px;
+            padding-top: 0.4rem;
+            padding-bottom: 0.4rem;
+        }
+
+        /* Center navbar items */
+        .navbar-nav.me-auto {
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+
+        /* Style for role display next to logout button */
+        .navbar-role-display {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 1rem;
+            padding: 0.25rem 0.5rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+
+        /* Ensure buttons and role display are properly aligned */
+        .navbar-nav.ms-auto {
+            display: flex;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+
+            /* Remove top padding from login/register buttons to align with nav links */
+            .navbar-nav.ms-auto .nav-item {
+                display: flex;
+                align-items: center;
+            }
+
+            .navbar-nav.ms-auto .btn {
+                margin-top: 0;
+                padding-top: 0.5rem;
+                padding-bottom: 0.5rem;
+            }
+
+        /* Back to top button */
+        #backToTop {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 99;
+            border: none;
+            outline: none;
+            background-color: #0d6efd;
+            color: white;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 50%;
+            font-size: 18px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+            #backToTop:hover {
+                background-color: #0b5ed7;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="bg-light text-dark">
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-light" asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="fas fa-snowflake me-2"></i>Fridge Frenzy
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="About">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Contact">Contact</a>
+                    </li>
+
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <!-- Show Dashboard ONLY for Employees and Admins (not customers) -->
+                        @if (User.IsInRole("Admin") || User.IsInRole("Sales") || User.IsInRole("CustomerManager") || User.IsInRole("Technician") || User.IsInRole("Employee"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Dashboard" asp-controller="Home" asp-action="Index">
+                                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <!-- Show Shop and Cart ONLY for Customers -->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Purchasing" asp-action="Index">
+                                    Shop
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Identity" asp-controller="Services" asp-action="Index">
+                                    <i class="fas fa-tools me-1"></i>Services
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Cart" asp-action="Index">
+                                    <i class="fas fa-shopping-cart"></i> Cart
+                                    <span class="badge bg-danger cart-count-badge" id="cartCount">0</span>
+                                </a>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <!-- Show Shop for guests -->
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Purchasing" asp-action="Index">
+                                Shop
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Cart" asp-action="Index">
+                                <i class="fas fa-shopping-cart"></i> Cart
+                                <span class="badge bg-danger cart-count-badge" id="cartCount">0</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+
+                <ul class="navbar-nav ms-auto">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <!-- Employee Users (hide customer features) -->
+                        @if (User.IsInRole("Admin") || User.IsInRole("Sales") || User.IsInRole("CustomerManager") || User.IsInRole("Technician") || User.IsInRole("Employee"))
+                        {
+                            <li class="nav-item d-flex align-items-center">
+                                <span class="navbar-role-display text-light">
+                                    <i class="fas fa-user-tie me-1"></i>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <span>Administrator</span>
+                                    }
+                                    else if (User.IsInRole("Sales"))
+                                    {
+                                        <span>Sales Representative</span>
+                                    }
+                                    else if (User.IsInRole("CustomerManager"))
+                                    {
+                                        <span>Customer Manager</span>
+                                    }
+                                    else if (User.IsInRole("Technician"))
+                                    {
+                                        <span>Technician</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Employee</span>
+                                    }
+                                </span>
+                                <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-sign-out-alt"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <!-- Regular Customer Users (show customer features) -->
+                            <li class="nav-item">
+                                <a class="btn btn-outline-light btn-sm me-2" asp-area="" asp-controller="Cart" asp-action="OrderHistory">
+                                    <i class="fas fa-history me-1"></i>Order History
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-outline-light btn-sm me-2" asp-area="Identity" asp-page="/Account/Manage/Index">
+                                    <i class="fas fa-user-cog"></i> Manage Account
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-sign-out-alt"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <!-- Guest User Menu - Centered like other nav items -->
+                        <li class="nav-item">
+                            <a class="btn btn-outline-light btn-sm me-2" asp-area="Identity" asp-page="/Account/Login">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-success btn-sm" asp-area="Identity" asp-page="/Account/Register">
+                                <i class="fas fa-user-plus"></i> Register
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Toast Notification Container - CRITICAL FOR IMMEDIATE FEEDBACK -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;" id="globalToastContainer"></div>
+
+    <!-- MAIN CONTENT -->
+    <div class="container py-4">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer mt-auto bg-dark text-light py-5">
+        <div class="container">
+            <div class="row gy-4 text-center text-md-start justify-content-center">
+                <!-- About Section -->
+                <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+                    <div class="d-flex justify-content-center justify-content-md-start align-items-center mb-3">
+                        <i class="fas fa-snowflake fa-2x text-primary me-2"></i>
+                        <h5 class="mb-0 fw-bold">Fridge Frenzy</h5>
+                    </div>
+                    <p class="small text-light mb-0">
+                        At <strong>Fridge Frenzy</strong>, we specialize in top-quality refrigeration products,
+                        professional repairs, and reliable maintenance.
+                        Keeping your world cool — one fridge at a time.
+                    </p>
+                </div>
+
+                <!-- Quick Links (Centered) -->
+                <div class="col-lg-4 col-md-6 mb-4 mb-lg-0 text-center">
+                    <h6 class="fw-semibold text-uppercase mb-3">Quick Links</h6>
+                    <ul class="list-unstyled footer-links small d-inline-block text-start">
+                        <li><a href="@Url.Action("Index", "Home", new { area = "" })">Home</a></li>
+                        <li><a href="@Url.Action("About", "Home", new { area = "" })">About</a></li>
+                        <li><a href="@Url.Action("Index", "Purchasing", new { area = "" })">Shop</a></li>
+                        <li><a href="@Url.Action("Privacy", "Home", new { area = "" })">Privacy</a></li>
+                        <li><a href="@Url.Action("Login", "Account", new { area = "Identity" })">Login</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="col-lg-4 col-md-8">
+                    <h6 class="fw-semibold text-uppercase mb-3">Contact Us</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2">
+                            <i class="fas fa-phone me-2 text-primary"></i>
+                            <a href="tel:0810286437" class="text-light text-decoration-none">081 028 6437</a>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-envelope me-2 text-primary"></i>
+                            <a href="mailto:info@fridgefrenzy.com" class="text-light text-decoration-none">
+                                info@fridgefrenzy.com
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-clock me-2 text-primary"></i>
+                            Mon - Fri: 8:00 AM – 5:00 PM
+                        </li>
+                        <li>
+                            <i class="fas fa-map-marker-alt me-2 text-primary"></i>
+                            Serving businesses across the region
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <hr class="my-4 border-secondary">
+
+            <!-- Bottom Line -->
+            <div class="row align-items-center justify-content-center text-center">
+                <div class="col-md-12">
+                    <small>
+                        &copy; @DateTime.Now.Year Fridge Frenzy. All rights reserved. |
+                        Designed by Ctrl, Alt & Elite.
+                        
+                    </small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" title="Back to Top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Scripts - PROPER ORDER AND NO DUPLICATES -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- Validation scripts - MUST come after jQuery -->
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+ 
+    <script>
+        (function() {
+            'use strict';
+
+            // Check for TempData messages IMMEDIATELY
+            const tempDataMessages = {
+                success: '@Html.Raw(TempData["SuccessMessage"]?.ToString() ?? "")',
+                error: '@Html.Raw(TempData["ErrorMessage"]?.ToString() ?? "")',
+                warning: '@Html.Raw(TempData["WarningMessage"]?.ToString() ?? "")',
+                info: '@Html.Raw(TempData["InfoMessage"]?.ToString() ?? "")'
+            };
+
+            // Global toast function - available everywhere
+            window.showGlobalToast = function(type, message) {
+                if (!message || message.trim() === '') return;
+
+                const container = document.getElementById('globalToastContainer');
+                if (!container) {
+                    console.error('Toast container not found');
+                    return;
+                }
+
+                const typeConfig = {
+                    success: { bgClass: 'bg-success', icon: 'fa-check-circle' },
+                    error: { bgClass: 'bg-danger', icon: 'fa-exclamation-circle' },
+                    warning: { bgClass: 'bg-warning text-dark', icon: 'fa-exclamation-triangle' },
+                    info: { bgClass: 'bg-info', icon: 'fa-info-circle' }
+                };
+
+                const config = typeConfig[type] || typeConfig.info;
+
+                const toastHtml = `
+                    <div class="toast align-items-center text-white ${config.bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <i class="fas ${config.icon} me-2"></i>${message}
+                            </div>
+                            <button type="button" class="btn-close ${config.bgClass.includes('text-dark') ? '' : 'btn-close-white'} me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                `;
+
+                container.insertAdjacentHTML('beforeend', toastHtml);
+                const toastElement = container.lastElementChild;
+
+                const toast = new bootstrap.Toast(toastElement, {
+                    autohide: true,
+                    delay: 5000
+                });
+
+                toast.show();
+
+                toastElement.addEventListener('hidden.bs.toast', function() {
+                    toastElement.remove();
+                });
+            };
+
+            // Function to update cart count from server
+            window.updateCartCount = function() {
+                console.log('updateCartCount function called');
+
+                // Check if user is authenticated customer (not employee/admin)
+                @{
+                        var isCustomer = User.Identity.IsAuthenticated &&
+                                                      !(User.IsInRole("Admin") ||
+                                                          User.IsInRole("Sales") ||
+                                                          User.IsInRole("CustomerManager") ||
+                                                          User.IsInRole("Technician") ||
+                                                          User.IsInRole("Employee"));
+                }
+
+                @if (isCustomer)
+                {
+                        <text>
+                        console.log('User is authenticated customer, fetching cart count...');
+                            fetch('@Url.Action("GetCartCount", "Cart", new { area = "" })')
+                            .then(response => {
+                                console.log('Cart count response status:', response.status);
+                                if (!response.ok) throw new Error('Network response was not ok');
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('Cart count data received:', data);
+                                const cartBadge = document.getElementById('cartCount');
+                                if (cartBadge) {
+                                    cartBadge.textContent = data.count;
+                                    cartBadge.style.display = data.count > 0 ? 'inline-block' : 'none';
+                                    console.log('Cart badge updated to:', data.count);
+                                } else {
+                                    console.warn('Cart badge element not found');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Cart count fetch error:', error);
+                            });
+                        </text>
+                }
+                else
+                {
+                        <text>
+                        console.log('User is not an authenticated customer or is employee/admin');
+                        </text>
+                }
+            };
+
+                    // Function to initialize cart count updates
+                // Function to initialize cart count updates
+        function initializeCartCount() {
+            console.log('initializeCartCount called - User authenticated:', @User.Identity.IsAuthenticated.ToString().ToLower());
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                    // Check if user is employee/admin in Razor, not JavaScript
+                    var isEmployeeOrAdmin = User.IsInRole("Admin") || User.IsInRole("Sales") || User.IsInRole("CustomerManager") || User.IsInRole("Technician") || User.IsInRole("Employee");
+
+                    if (!isEmployeeOrAdmin)
+                    {
+                            <text>
+                            console.log('User is authenticated customer, fetching cart count...');
+
+                            // Update immediately
+                            updateCartCount();
+
+                            // Set up periodic updates every 30 seconds
+                            const cartInterval = setInterval(updateCartCount, 30000);
+
+                            // Also update on page visibility change (when user switches back to tab)
+                            document.addEventListener('visibilitychange', function() {
+                                if (!document.hidden) {
+                                    console.log('Page became visible, updating cart count');
+                                    updateCartCount();
+                                }
+                            });
+
+                            console.log('Cart count updates initialized for customer');
+                            </text>
+                    }
+                    else
+                    {
+                            <text>
+                            console.log('User is employee/admin, skipping cart count updates');
+                            // Hide cart badge for employees/admins
+                            const cartBadge = document.getElementById('cartCount');
+                            if (cartBadge) {
+                                cartBadge.style.display = 'none';
+                            }
+                            </text>
+                    }
+            }
+            else
+            {
+                    <text>
+                    // Guest users - update cart count
+                    console.log('User is guest, fetching cart count...');
+                    updateCartCount();
+
+                    const cartInterval = setInterval(updateCartCount, 30000);
+
+                    document.addEventListener('visibilitychange', function() {
+                        if (!document.hidden) {
+                            updateCartCount();
+                        }
+                    });
+                    </text>
+            }
+        }
+
+            // Show TempData messages immediately on load
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('DOMContentLoaded - Checking for TempData messages...');
+
+                Object.keys(tempDataMessages).forEach(function(type) {
+                    const message = tempDataMessages[type];
+                    if (message && message.trim() !== '') {
+                        console.log('Displaying ' + type + ' message:', message);
+                        showGlobalToast(type, message);
+                    }
+                });
+
+                // Initialize cart count updates
+                initializeCartCount();
+
+                // Auto-dismiss alerts after 5 seconds - ONLY for temporary alerts
+                const alerts = document.querySelectorAll('.alert:not(.alert-permanent):not(.toast)');
+                alerts.forEach(function(alert) {
+                    // Check if it's a toast (those should auto-dismiss) or a permanent alert
+                    if (!alert.closest('.toast') && !alert.classList.contains('alert-permanent')) {
+                        setTimeout(function() {
+                            if (alert && alert.parentNode) {
+                                const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                                bsAlert.close();
+                            }
+                        }, 5000);
+                    }
+                });
+
+                // Back to top button functionality
+                const backToTopButton = document.getElementById("backToTop");
+
+                // Show the button when user scrolls down 100px
+                window.onscroll = function() {
+                    if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+                        backToTopButton.style.display = "block";
+                    } else {
+                        backToTopButton.style.display = "none";
+                    }
+                };
+
+                // Scroll to top when button is clicked
+                backToTopButton.addEventListener("click", function() {
+                    document.body.scrollTop = 0; // For Safari
+                    document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+                });
+            });
+
+            // Also initialize on window load as a fallback
+            window.addEventListener('load', function() {
+                console.log('Window loaded - ensuring cart count is initialized');
+                // Re-initialize cart count in case DOMContentLoaded didn't fire properly
+                if (typeof initializeCartCount === 'function') {
+                    initializeCartCount();
+                }
+            });
+
+        })();
+
+        // Modal cleanup for proper Bootstrap 5 behavior
+        document.addEventListener('hidden.bs.modal', function (event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(function(modal) {
+                modal.setAttribute('aria-hidden', 'true');
+            });
+            document.body.classList.remove('modal-open');
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(function(backdrop) {
+                backdrop.remove();
+            });
+        });
+
+        document.addEventListener('show.bs.modal', function (event) {
+            event.target.removeAttribute('aria-hidden');
+        });
+
+        @if (TempData["Success"] != null)
+        {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+        }
+
+        // Session timeout functionality
+        (function() {
+            'use strict';
+
+            const TIMEOUT_MINUTES = 5; // Must match server-side timeout
+            const WARNING_MINUTES = 4; // Show warning 1 minute before timeout
+            const CHECK_INTERVAL = 30000; // Check every 30 seconds
+
+            let lastActivity = Date.now();
+            let timeoutWarningShown = false;
+
+            // Track user activity
+            function resetActivityTimer() {
+                lastActivity = Date.now();
+                timeoutWarningShown = false;
+            }
+
+            // Activity events to monitor
+            const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+
+            activityEvents.forEach(event => {
+                document.addEventListener(event, resetActivityTimer, true);
+            });
+
+            // Check for inactivity
+            function checkInactivity() {
+                const now = Date.now();
+                const inactiveTime = (now - lastActivity) / 1000 / 60; // in minutes
+
+                // Show warning at 4 minutes
+                if (inactiveTime >= WARNING_MINUTES && !timeoutWarningShown) {
+                    timeoutWarningShown = true;
+                    const remainingSeconds = Math.round((TIMEOUT_MINUTES - inactiveTime) * 60);
+
+                    if (confirm(`You will be logged out in ${remainingSeconds} seconds due to inactivity.\n\nClick OK to stay logged in.`)) {
+                        resetActivityTimer();
+
+                        // Ping server to keep session alive
+                        fetch('/Home/Index', {
+                            method: 'HEAD',
+                            credentials: 'include'
+                        }).catch(err => console.log('Keep-alive ping failed:', err));
+                    }
+                }
+
+                // Force logout at 5 minutes
+                if (inactiveTime >= TIMEOUT_MINUTES) {
+                    alert('Your session has expired due to inactivity. You will be logged out.');
+                    window.location.href = '~/Identity/Account/Logout';
+                }
+            }
+
+            // Start monitoring
+            setInterval(checkInactivity, CHECK_INTERVAL);
+
+            // ===== DETECT BROWSER/TAB CLOSE =====
+
+            // Mark session as "should expire" when closing
+            window.addEventListener('beforeunload', function(e) {
+                // Set a flag in sessionStorage (cleared when browser closes)
+                sessionStorage.setItem('browserClosing', 'true');
+
+                // Modern browsers don't allow custom messages, but we can still detect the close
+                // The session will naturally expire since Cookie.MaxAge = null (session cookie)
+            });
+
+            // On page load, check if browser was properly closed
+            window.addEventListener('load', function() {
+                // If sessionStorage still exists, browser wasn't closed (just navigation)
+                // If it doesn't exist, browser was closed and reopened
+                const wasClosing = sessionStorage.getItem('browserClosing');
+
+                if (wasClosing === 'true') {
+                    // Browser wasn't actually closed, just navigated
+                    sessionStorage.removeItem('browserClosing');
+                } else {
+                    // This is a fresh browser session
+                    console.log('Fresh browser session detected');
+                }
+            });
+
+            console.log(`Session timeout monitor initialized (${TIMEOUT_MINUTES} min timeout)`);
+        })();
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+ <style>
+    
+    .footer {
+        background: #111;
+        color: #ddd;
+    }
+
+        .footer h6 {
+            letter-spacing: 0.5px;
+            color: #f8f9fa;
+        }
+
+    .footer-links li {
+        margin-bottom: 0.6rem;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .footer-links a {
+        color: #bbb;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+    }
+
+        .footer-links a::after {
+            content: "›";
+            opacity: 0;
+            transform: translateX(-8px);
+            margin-left: 4px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .footer-links a:hover {
+            color: #0d6efd;
+        }
+
+            .footer-links a:hover::after {
+                opacity: 1;
+                transform: translateX(4px);
+            }
+
+    .designer-link {
+        opacity: 0.85;
+        transition: all 0.3s ease;
+    }
+
+        .designer-link:hover {
+            opacity: 1;
+            color: #0d6efd !important;
+            text-decoration: underline;
+        }
+
+    .footer p {
+        line-height: 1.6;
+    }
+
+    /* Center Quick Links column on smaller devices */
+    @@media (max-width: 991.98px) {
+        .footer .col-lg-4.text-center
+
+    {
+        margin-top: 20px;
+    }
+
+    }
+</style>
